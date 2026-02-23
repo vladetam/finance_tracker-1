@@ -38,9 +38,10 @@ public class EmployeeController {
 
     /**
      * Get all employes from DB
+     * API: http://localhost:8080/api/employee/getAll
      * */
 
-    
+
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAllEmployes(){
 
