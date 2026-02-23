@@ -1,6 +1,7 @@
 package orion.rs.demo.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +37,8 @@ public class Transaction {
     private BigDecimal amount;
 
     private String category;
-
+    @Enumerated(EnumType.STRING)
+    @NotNull
     private Status status;
 
 }
