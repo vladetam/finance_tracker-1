@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.domain.Employee;
 import orion.rs.demo.service.implementation.EmployeeServiceImplementation;
+import orion.rs.demo.dto.CreateEmployeeDto;
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("api/employee")
@@ -34,4 +35,17 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createEmployee(@Valid @RequestBody CreateEmployeeDto dto) {
+        try {
+            Employee saved = employeeService.createEmployee(dto);
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error saving employee: " + e.getMessage());
+        }
+    }
+
+
 }

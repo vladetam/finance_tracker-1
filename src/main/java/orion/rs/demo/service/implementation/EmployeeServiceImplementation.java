@@ -3,6 +3,7 @@ package orion.rs.demo.service.implementation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import orion.rs.demo.domain.Employee;
+import orion.rs.demo.dto.CreateEmployeeDto;
 import orion.rs.demo.exceptionHandling.EmployeeNotFoundException;
 import orion.rs.demo.repository.EmployeeRepository;
 
@@ -27,6 +28,15 @@ public class EmployeeServiceImplementation {
                 new EmployeeNotFoundException(id_employee));
 
         employeeRepository.delete(employee);
+    }
+
+    public Employee createEmployee(CreateEmployeeDto dto) {
+        Employee employee = new Employee();
+        employee.setFirstname(dto.getFirstName());
+        employee.setLastname(dto.getLastName());
+        employee.setEmail(dto.getEmail());
+
+        return employeeRepository.save(employee);
     }
 
 }
