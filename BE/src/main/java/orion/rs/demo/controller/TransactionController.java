@@ -1,11 +1,16 @@
 package orion.rs.demo.controller;
 
+import org.springframework.data.jpa.domain.Specification;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.repository.TransactionRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.transaction_specification.TransactionSpecification;
+
+import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -65,4 +70,24 @@ public class TransactionController {
             return ResponseEntity.status(500).body("Database error");
         }
     }
+
+    @GetMapping
+    public List<Transaction> getTransactions(
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date endDate
+    ) {
+        Specification<Transaction> spec = Specification
+                .where(TransactionSpecification.hasEmployeeID(employeeId))
+                .and(TransactionSpecification.hasAccountId(accountId))
+                .and(TransactionSpecification.hasCategory(category))
+                .and(TransactionSpecification.hasDateBetween(startDate, endDate))
+                .and(TransactionSpecification.orderByDateDesc());
+
+        return transactionRepository.findAll(spec);
+    }
+
+
 }
