@@ -1,8 +1,10 @@
 package orion.rs.demo.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.dto.EmployeeDto;
@@ -16,9 +18,9 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @PostMapping
-    public ResponseEntity<EmployeeDto> create(@RequestBody EmployeeDto dto) {
+    public ResponseEntity<EmployeeDto> create(@Valid @RequestBody EmployeeDto dto) {
         EmployeeDto created = employeeService.create(dto);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
@@ -35,7 +37,7 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDto> update(@PathVariable Long id,
-                                              @RequestBody EmployeeDto dto) {
+                                              @Valid @RequestBody EmployeeDto dto) {
         EmployeeDto updated = employeeService.update(id, dto);
         return ResponseEntity.ok(updated);
     }

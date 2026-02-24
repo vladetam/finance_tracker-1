@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import orion.rs.demo.domain.Employee;
 import orion.rs.demo.dto.EmployeeDto;
+import orion.rs.demo.exceptionHandling.EmployeeNotFoundException;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.EmployeeService;
 
@@ -32,7 +33,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public EmployeeDto getById(Long id) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
 
         return mapToDto(employee);
     }
@@ -48,7 +49,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public EmployeeDto update(Long id, EmployeeDto dto) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
 
         employee.setFirstname(dto.getFirstName());
         employee.setLastname(dto.getLastName());
@@ -63,7 +64,7 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public void delete(Long id) {
 
         if (!employeeRepository.existsById(id)) {
-            throw new RuntimeException("Employee not found");
+            throw new EmployeeNotFoundException(id);
         }
 
         employeeRepository.deleteById(id);
