@@ -20,7 +20,8 @@ public class Employee {
 
     private String firstname;
     private String lastname;
-    @Email
+
+    @Email//da mora da bude u dobrom formatu
     private String email;
 
     @JsonIgnore //rekurzivno trazenje instanci dolazi do greske - ovako resavamo

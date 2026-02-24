@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,8 +24,12 @@ public class Account {
     private AccountType type;
     private double balance;
     private String currency;
+
+
     @Version
     private int version;
+
+
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
