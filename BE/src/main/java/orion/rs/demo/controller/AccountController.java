@@ -23,4 +23,13 @@ public class AccountController {
         AccountDTO savedAccount = accountService.createAccount(accountCreateDTO);
         return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AccountDTO> updateAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody AccountCreateDTO accountUpdateDTO) {
+
+        AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
+        return ResponseEntity.ok(updatedAccount);
+    }
 }

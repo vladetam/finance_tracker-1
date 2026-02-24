@@ -3,6 +3,7 @@ package orion.rs.demo.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 @Getter
@@ -14,7 +15,7 @@ public class AccountCreateDTO {
     @NotNull(message = "Tip naloga je obavezan")
     private String type;
 
-    @Positive(message = "Balans mora da je veci od 0")
+    @PositiveOrZero(message = "Balans mora da je >= 0")
     private double balance;
 
     @NotBlank(message = "Valuta je obavezna")
