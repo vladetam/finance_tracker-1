@@ -3,10 +3,13 @@ package orion.rs.demo.controller;
 import jakarta.validation.Valid;
 import orion.rs.demo.dto.AccountCreateDTO;
 import orion.rs.demo.dto.AccountDTO;
+import orion.rs.demo.dto.BulkInsertAccDTO;
 import orion.rs.demo.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -31,5 +34,13 @@ public class AccountController {
 
         AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
         return ResponseEntity.ok(updatedAccount);
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<BulkInsertAccDTO> bulkInsertAccounts(
+            @RequestBody List<AccountCreateDTO> dtos) {
+
+        BulkInsertAccDTO result = accountService.bulkInsert(dtos);
+        return ResponseEntity.ok(result);
     }
 }
