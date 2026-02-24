@@ -27,13 +27,7 @@ public class TransactionSpecification {
         };
     }
 
-    // filter by type
-    public static Specification<Transaction> hashStatus(Status status) {
-        return (root, query, criteriaBuilder) -> {
-            if (status == null) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("status"), status);
+
         };
     }
 

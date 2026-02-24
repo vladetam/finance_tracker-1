@@ -16,4 +16,6 @@ public interface AccountService {
     AccountDTO createAccount(AccountCreateDTO dto);
     AccountDTO updateAccount(Long id, AccountCreateDTO dto);
     BulkInsertAccDTO bulkInsert(List<AccountCreateDTO> dtos);
+
+    void deleteAccount(Long id);
 }

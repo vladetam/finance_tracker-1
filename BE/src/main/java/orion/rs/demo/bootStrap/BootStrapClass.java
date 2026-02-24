@@ -53,11 +53,44 @@ public class BootStrapClass implements CommandLineRunner {
         account3.setCurrency("AUD");
         account3.setEmployee(employee);
 
+        Account account4 = new Account();
+        account4.setType(AccountType.GOLD);
+        account4.setBalance(2500.0);
+        account4.setCurrency("CHF");
+        account4.setEmployee(employee2);
+
+        Account account5 = new Account();
+        account5.setType(AccountType.SILVER);
+        account5.setBalance(1800.0);
+        account5.setCurrency("GBP");
+        account5.setEmployee(employee);
+
+        Account account6 = new Account();
+        account6.setType(AccountType.PLATINUM);
+        account6.setBalance(7200.0);
+        account6.setCurrency("CAD");
+        account6.setEmployee(employee2);
+
+        Account account7 = new Account();
+        account7.setType(AccountType.GOLD);
+        account7.setBalance(3100.0);
+        account7.setCurrency("JPY");
+        account7.setEmployee(employee);
+
+        Account account8 = new Account();
+        account8.setType(AccountType.SILVER);
+        account8.setBalance(950.0);
+        account8.setCurrency("EUR");
+        account8.setEmployee(employee2);
 
         employee.getEmployeeAcounts().add(account1);
         employee.getEmployeeAcounts().add(account2);
+        employee.getEmployeeAcounts().add(account5);
+        employee.getEmployeeAcounts().add(account7);
         employee2.getEmployeeAcounts().add(account3);
-
+        employee2.getEmployeeAcounts().add(account4);
+        employee2.getEmployeeAcounts().add(account6);
+        employee2.getEmployeeAcounts().add(account8);
 
         employeeRepository.save(employee);
         employeeRepository.save(employee2);

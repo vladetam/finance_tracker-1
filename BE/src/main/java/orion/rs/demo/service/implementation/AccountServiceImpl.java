@@ -7,6 +7,7 @@ import orion.rs.demo.dto.AccountCreateDTO;
 import orion.rs.demo.dto.AccountDTO;
 import orion.rs.demo.dto.BulkInsertAccDTO;
 import orion.rs.demo.dto.FailedRecord;
+import orion.rs.demo.exceptionHandling.AccountNotFoundException;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.AccountService;
@@ -40,7 +41,9 @@ public class AccountServiceImpl implements AccountService {
         // Validacija zaposlenog
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen."));
-
+        if(!dto.getCurrency().matches("[a-zA-Z]+")){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
+        }
         // Kreiranje account objekta
         Account account = new Account();
         account.setType(AccountType.valueOf(dto.getType())); // String -> enum
@@ -67,6 +70,9 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen"));
 
+        if(!dto.getCurrency().matches("[a-zA-Z]+")){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
+        }
         // Update polja
         account.setType(AccountType.valueOf(dto.getType()));
         account.setBalance(dto.getBalance());
@@ -82,6 +88,17 @@ public class AccountServiceImpl implements AccountService {
                     HttpStatus.INTERNAL_SERVER_ERROR, "Greska prilikom cuvanja zaposlenog");
         }
     }
+
+
+
+    @Override
+    public void deleteAccount(Long id) {
+        if (!accountRepository.existsById(id)) {
+            throw new AccountNotFoundException(id);
+        }
+        accountRepository.deleteById(id);
+    }
+
 
     @Transactional
     public BulkInsertAccDTO bulkInsert(List<AccountCreateDTO> dtos) {
@@ -108,7 +125,7 @@ public class AccountServiceImpl implements AccountService {
                 if (dto.getBalance() < 0) {
                     throw new IllegalArgumentException("Balans mora da je pozitivan");
                 }
-                if (dto.getCurrency() == null || dto.getCurrency().isBlank()) {
+                if (dto.getCurrency() == null || dto.getCurrency().isBlank() || !dto.getCurrency().matches("[a-zA-Z]+")) {
                     throw new IllegalArgumentException("Valuta je obavezna");
                 }
 

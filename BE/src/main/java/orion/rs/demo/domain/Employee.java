@@ -22,6 +22,7 @@ public class Employee {
     private String lastname;
 
     @Email//da mora da bude u dobrom formatu
+    @Column(unique = true) // mora da bude unique
     private String email;
 
     @JsonIgnore //rekurzivno trazenje instanci dolazi do greske - ovako resavamo

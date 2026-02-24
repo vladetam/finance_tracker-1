@@ -4,12 +4,14 @@ using namespace std;
 #include "Account.h"
 #include "Employee.h"
 #include "Transaction.h"
+#include <nlohmann/json.hpp>
+
 bool running = true;
 vector<Employee> employees;
 vector<Account> accounts;
 vector<Transaction> transactions;
 void main() {
-	// ucitas iz json i/ili iz baze
+	// ucitas iz json i iz baze  ||  ucitas iz json i zoves api za proveru ?
 	
 	//store u vector
 	while (running) {
@@ -32,7 +34,7 @@ void main() {
 			cout << 2;
 			break;
 		case 3:
-			cout << 3;
+			createEmployee();
 			break;
 		case 4:
 			cout << 4;
