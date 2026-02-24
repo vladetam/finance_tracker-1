@@ -1,5 +1,6 @@
 package orion.rs.demo.transaction_specification;
 
+import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -23,16 +24,6 @@ public class TransactionSpecification {
         return (root, query, cb) -> {
             if (accountId == null) return cb.conjunction();
             return cb.equal(root.get("account").get("id"), accountId);
-        };
-    }
-
-    // Filter po category (transaction type)
-    public static Specification<Transaction> hasCategory(String category) {
-        return (root, query, criteriaBuilder) -> {
-            if (category == null || category.isEmpty()) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("category"), category);
         };
     }
 

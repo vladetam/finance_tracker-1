@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import orion.rs.demo.service.EmployeeService;
 import orion.rs.demo.service.implementation.EmployeeServiceImplementation;
 
 import javax.print.attribute.standard.Media;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -60,6 +63,21 @@ public class EmployeeController {
 
             employeeServiceImpl.saveOrSkipEmployee(bulkEmployeeDTOS);
             return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportEmployees() {
+
+        byte[] csvData = employeeService.exportEmployeesToCsv();
+
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String filename = "employees_" + date + ".csv";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + filename)
+                .header(HttpHeaders.CONTENT_TYPE, "text/csv")
+                .body(csvData);
     }
 
     /**
