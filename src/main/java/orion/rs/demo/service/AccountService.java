@@ -11,4 +11,6 @@ public interface AccountService {
      * @return DTO kreiranog accounta
      */
     AccountDTO createAccount(AccountCreateDTO dto);
+
+
 }

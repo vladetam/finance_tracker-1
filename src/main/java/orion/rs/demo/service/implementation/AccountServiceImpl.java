@@ -1,5 +1,6 @@
 package orion.rs.demo.service.implementation;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import orion.rs.demo.domain.Account;
 import orion.rs.demo.domain.AccountType;
 import orion.rs.demo.domain.Employee;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -23,6 +26,10 @@ public class AccountServiceImpl implements AccountService {
                               EmployeeRepository employeeRepository) {
         this.accountRepository = accountRepository;
         this.employeeRepository = employeeRepository;
+    }
+
+    public List<Account> getAllAccounts(){
+        return accountRepository.findAll();
     }
 
     @Override
