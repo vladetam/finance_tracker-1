@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# vcpkg installed folder
+CLIapp/vcpkg_installed/
+
+# vcpkg config files (optional)
+CLIapp/vcpkg-configuration.json
+CLIapp/vcpkg.json
+
+# runtime data
+CLIapp/employees.json
