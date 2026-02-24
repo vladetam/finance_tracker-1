@@ -1,6 +1,7 @@
 package orion.rs.demo.controller;
 
 import org.springframework.data.jpa.domain.Specification;
+import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.repository.TransactionRepository;
 import orion.rs.demo.repository.EmployeeRepository;
@@ -75,14 +76,14 @@ public class TransactionController {
     public List<Transaction> getTransactions(
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) Long accountId,
-            @RequestParam(required = false) String category,
+            @RequestParam(required = false)Status status,
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date startDate,
             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date endDate
     ) {
         Specification<Transaction> spec = Specification
                 .where(TransactionSpecification.hasEmployeeID(employeeId))
                 .and(TransactionSpecification.hasAccountId(accountId))
-                .and(TransactionSpecification.hasCategory(category))
+                .and(TransactionSpecification.hashStatus(status))
                 .and(TransactionSpecification.hasDateBetween(startDate, endDate))
                 .and(TransactionSpecification.orderByDateDesc());
 

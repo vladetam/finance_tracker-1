@@ -1,5 +1,6 @@
 package orion.rs.demo.transaction_specification;
 
+import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -26,13 +27,13 @@ public class TransactionSpecification {
         };
     }
 
-    // Filter po category (transaction type)
-    public static Specification<Transaction> hasCategory(String category) {
+    // filter by type
+    public static Specification<Transaction> hashStatus(Status status) {
         return (root, query, criteriaBuilder) -> {
-            if (category == null || category.isEmpty()) {
+            if (status == null) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(root.get("category"), category);
+            return criteriaBuilder.equal(root.get("status"), status);
         };
     }
 
