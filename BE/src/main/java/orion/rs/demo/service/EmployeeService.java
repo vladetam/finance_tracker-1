@@ -15,4 +15,6 @@ public interface EmployeeService {
     EmployeeDto update(Long id, EmployeeDto dto);
 
     void delete(Long id);
+
+    byte[] exportEmployeesToCsv();
 }

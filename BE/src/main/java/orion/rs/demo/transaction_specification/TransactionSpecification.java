@@ -27,10 +27,6 @@ public class TransactionSpecification {
         };
     }
 
-
-        };
-    }
-
     // filter po datumu
     public static Specification<Transaction> hasDateBetween(Date startDate, Date endDate) {
         return (root, query, criteriaBuilder) -> {

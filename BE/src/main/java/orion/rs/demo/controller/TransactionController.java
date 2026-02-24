@@ -83,7 +83,7 @@ public class TransactionController {
         Specification<Transaction> spec = Specification
                 .where(TransactionSpecification.hasEmployeeID(employeeId))
                 .and(TransactionSpecification.hasAccountId(accountId))
-                .and(TransactionSpecification.hashStatus(status))
+                //.and(TransactionSpecification.hashStatus(status))
                 .and(TransactionSpecification.hasDateBetween(startDate, endDate))
                 .and(TransactionSpecification.orderByDateDesc());
 
