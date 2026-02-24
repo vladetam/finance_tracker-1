@@ -86,6 +86,20 @@ public class TransactionService {
         }
     }
 
+    public void deleteTransaction(Long id) throws Exception {
+
+        // 1. Provera da li transakcija postoji u bazi
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new Exception("Transaction not found with id: " + id));
+
+        // 2. Brisanje transakcije
+        try {
+            transactionRepository.delete(transaction);
+        } catch (Exception e) {
+            throw new Exception("Database error while deleting transaction: " + e.getMessage());
+        }
+    }
+
     public TransactionDTO getTransactionById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found: " + id));

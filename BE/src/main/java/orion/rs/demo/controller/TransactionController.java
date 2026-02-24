@@ -24,8 +24,6 @@ public class TransactionController {
     private final TransactionRepository transactionRepository;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
-
-
     private final TransactionService transactionService;
 
     public TransactionController(
@@ -112,5 +110,20 @@ public class TransactionController {
         return transactionRepository.findAll(spec);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
 
+        try {
+            transactionService.deleteTransaction(id);
+            return ResponseEntity.noContent().build();
+
+        } catch (Exception e) {
+            //ako transakcija ne postoji
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).body(e.getMessage());
+            }
+            //sve ostale greške
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 }
