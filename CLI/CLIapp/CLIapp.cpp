@@ -1,9 +1,17 @@
 #include <iostream>
 using namespace std;
-
+#include <vector>
+#include "Account.h"
+#include "Employee.h"
+#include "Transaction.h"
 bool running = true;
-
+vector<Employee> employees;
+vector<Account> accounts;
+vector<Transaction> transactions;
 void main() {
+	// ucitas iz json i/ili iz baze
+	
+	//store u vector
 	while (running) {
 		cout << "Choose one of the following options:" << endl;
 		cout << "1. Create Transaction" << endl;
