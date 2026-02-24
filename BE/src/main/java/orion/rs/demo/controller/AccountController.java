@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import orion.rs.demo.service.implementation.AccountServiceImpl;
 
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -45,6 +45,7 @@ public class AccountController {
     /**
      * Get all accounts from dataBase
      * */
+    // moze da se doda paginacija
     @GetMapping(value = "getAccounts",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Account>> getAllAcc(){
         return ResponseEntity.status(HttpStatus.OK).body(accountServiceImpl.getAllAcc());

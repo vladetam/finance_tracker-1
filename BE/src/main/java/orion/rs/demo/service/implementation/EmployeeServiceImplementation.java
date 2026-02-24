@@ -5,15 +5,43 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import orion.rs.demo.domain.Employee;
+import orion.rs.demo.dto.BulkEmployeeDTO;
 import orion.rs.demo.dto.EmployeeDto;
+import orion.rs.demo.mapper.EmployeeMapper;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.EmployeeService;
+import orion.rs.demo.validationObj.FailedEmployee;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImplementation implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private static final List<FailedEmployee> failedEmployees = new ArrayList<>();
+    /**
+     * BULK Insert Employees
+     * Save into DataBase if valid or skip
+     * */
+
+    public void saveOrSkipEmployee(List<BulkEmployeeDTO> bulkEmployeeDTOS){
+        for(int i = 0; i < bulkEmployeeDTOS.size(); i++){
+            if(checkValid(bulkEmployeeDTOS.get(i))){
+                Employee employee = EmployeeMapper.toEntity(bulkEmployeeDTOS.get(i));
+                employeeRepository.save(employee);
+            }else{
+                failedEmployees.add(new FailedEmployee(bulkEmployeeDTOS.get(i), "Validation Failed"));
+            }
+        }
+    }
+
+    public boolean checkValid(BulkEmployeeDTO bulkEmployeeDTO){
+        return !bulkEmployeeDTO.getEmail().isBlank() && !bulkEmployeeDTO.getLast_name().isBlank()
+                && !bulkEmployeeDTO.getFirst_name().isBlank();
+
+    }
 
     @Override
     public EmployeeDto create(EmployeeDto dto) {
