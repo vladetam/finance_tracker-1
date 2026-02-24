@@ -49,12 +49,43 @@ public class AccountServiceImpl implements AccountService {
         Account saved = accountRepository.save(account);
 
         // Vrati kao AccountDTO
+        return mapToDTO(saved);
+    }
+
+    @Transactional
+    public AccountDTO updateAccount(Long id, AccountCreateDTO dto) {
+
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Racun nije pronadjen"));
+
+        // Validacija zaposlenog
+        Employee employee = employeeRepository.findById(dto.getEmployeeId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen"));
+
+        // Update polja
+        account.setType(AccountType.valueOf(dto.getType()));
+        account.setBalance(dto.getBalance());
+        account.setCurrency(dto.getCurrency());
+        account.setEmployee(employee);
+
+        try {
+            Account saved = accountRepository.save(account);
+            return mapToDTO(saved);
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Greska prilikom cuvanja zaposlenog");
+        }
+    }
+    private AccountDTO mapToDTO(Account account) {
         return new AccountDTO(
-                saved.getId(),
-                saved.getType().name(),
-                saved.getBalance(),
-                saved.getCurrency(),
-                saved.getEmployee().getId()
+                account.getId(),
+                account.getType().name(),
+                account.getBalance(),
+                account.getCurrency(),
+                account.getEmployee().getId()
         );
     }
 }

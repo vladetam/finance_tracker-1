@@ -3,15 +3,18 @@ package orion.rs.demo.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Account;
+import orion.rs.demo.domain.Account;
 import orion.rs.demo.dto.AccountCreateDTO;
 import orion.rs.demo.dto.AccountDTO;
 import orion.rs.demo.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import orion.rs.demo.service.implementation.AccountServiceImpl;
 
 import java.util.List;
+import orion.rs.demo.service.implementation.AccountServiceImpl;
+
+
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -28,6 +31,15 @@ public class AccountController {
     public ResponseEntity<AccountDTO> createAccount(@Valid @RequestBody AccountCreateDTO accountCreateDTO) {
         AccountDTO savedAccount = accountService.createAccount(accountCreateDTO);
         return new ResponseEntity<>(savedAccount, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AccountDTO> updateAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody AccountCreateDTO accountUpdateDTO) {
+
+        AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
+        return ResponseEntity.ok(updatedAccount);
     }
 
     /**

@@ -11,4 +11,5 @@ public interface AccountService {
      * @return DTO kreiranog accounta
      */
     AccountDTO createAccount(AccountCreateDTO dto);
+    public AccountDTO updateAccount(Long id, AccountCreateDTO dto);
 }
