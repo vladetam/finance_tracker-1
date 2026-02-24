@@ -3,6 +3,7 @@ package orion.rs.demo.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Account;
+import orion.rs.demo.domain.Account;
 import orion.rs.demo.dto.AccountCreateDTO;
 import orion.rs.demo.dto.AccountDTO;
 import orion.rs.demo.dto.BulkInsertAccDTO;
@@ -10,10 +11,11 @@ import orion.rs.demo.service.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.service.EmployeeService;
 import java.util.List;
 import orion.rs.demo.service.implementation.AccountServiceImpl;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -39,6 +41,11 @@ public class AccountController {
 
         AccountDTO updatedAccount = accountService.updateAccount(id, accountUpdateDTO);
         return ResponseEntity.ok(updatedAccount);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable Long id){
+        accountService.deleteAccount(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
