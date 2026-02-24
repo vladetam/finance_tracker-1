@@ -1,6 +1,7 @@
 package orion.rs.demo.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Account;
 import orion.rs.demo.domain.Account;
@@ -12,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.service.EmployeeService;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import orion.rs.demo.service.implementation.AccountServiceImpl;
 
@@ -63,5 +67,20 @@ public class AccountController {
 
         BulkInsertAccDTO result = accountService.bulkInsert(dtos);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/bulk")
+    public ResponseEntity<byte[]> exportAccounts() {
+
+        byte[] csvData = accountService.bulkExportAccToCsv();
+
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String filename = "accounts_" + date + ".csv";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + filename)
+                .header(HttpHeaders.CONTENT_TYPE, "text/csv")
+                .body(csvData);
     }
 }
