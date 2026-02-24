@@ -1,5 +1,7 @@
 package orion.rs.demo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import orion.rs.demo.domain.Status;
@@ -9,6 +11,7 @@ import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.service.TransactionService;
 import orion.rs.demo.transaction_specification.TransactionSpecification;
 
 import java.util.Date;
@@ -22,13 +25,17 @@ public class TransactionController {
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
 
+
+    private final TransactionService transactionService;
+
     public TransactionController(
             TransactionRepository transactionRepository,
             EmployeeRepository employeeRepository,
-            AccountRepository accountRepository) {
+            AccountRepository accountRepository, TransactionService transactionService) {
         this.transactionRepository = transactionRepository;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
 
     @PostMapping
@@ -73,6 +80,19 @@ public class TransactionController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTransaction(
+            @PathVariable Long id,
+            @RequestBody Transaction transaction) {
+
+        try {
+            transactionService.updateTrans(id,transaction);
+            return ResponseEntity.status(HttpStatus.OK).build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
     @GetMapping
     public List<Transaction> getTransactions(
             @RequestParam(required = false) Long employeeId,

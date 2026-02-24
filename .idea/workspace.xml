@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="39b6d27d-7db2-465e-98de-6f6eda0129f6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/orion/rs/demo/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/orion/rs/demo/controller/TransactionController.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/BE/src/main/java/orion/rs/demo/dto/BulkInsertAccDTO.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/BE/src/main/java/orion/rs/demo/dto/FailedRecord.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/CLI/.gitignore" afterDir="false" />
@@ -75,6 +77,8 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.FinanceTrackerApplication.executor": "Run",
+    "git-widget-placeholder": "master",
     "Spring Boot.FinanceTrackerApplication.executor": "Debug",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "feature/bulk-insert-employee",
@@ -95,6 +99,8 @@
 }]]></component>
   <component name="RunManager">
     <configuration name="FinanceTrackerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="$PROJECT_DIR$/../../../../Program Files/Java/jdk-17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.jdks/openjdk-25.0.2" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="DEBUG_MODE" value="true" />
@@ -122,6 +128,7 @@
       <workItem from="1771845801821" duration="2745000" />
       <workItem from="1771878958657" duration="7004000" />
       <workItem from="1771924300728" duration="1443000" />
+      <workItem from="1771930589578" duration="4352000" />
       <workItem from="1771928729692" duration="597000" />
       <workItem from="1771929351091" duration="1124000" />
     </task>
