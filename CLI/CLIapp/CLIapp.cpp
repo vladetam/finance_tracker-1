@@ -31,7 +31,7 @@ void main() {
 			cout << 1;
 			break;
 		case 2:
-			cout << 2;
+			Account::createAccount();
 			break;
 		case 3:
 			createEmployee();
