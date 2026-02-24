@@ -12,21 +12,12 @@ Account::Account(long id,
 json Account::to_json() const {
     return json{
         {"id", id},
-        {"type", accountTypeToString(type)},
+        {"type", accTypeToString(type)},
         {"balance", balance},
         {"currency", currency},
         {"version", version},
         {"employee", employee.to_json()}
     };
-}
-
-std::string Account::accountTypeToString(AccountType type) {
-    switch (type) {
-    case AccountType::GOLD: return "GOLD";
-    case AccountType::SILVER: return "SILVER";
-    case AccountType::PLATINUM: return "PLATINUM";
-    }
-    return "Unknown";
 }
 
 bool Account::createAccount() {
