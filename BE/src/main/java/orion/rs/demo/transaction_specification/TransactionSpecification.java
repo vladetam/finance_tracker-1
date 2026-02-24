@@ -27,6 +27,7 @@ public class TransactionSpecification {
         };
     }
 
+
     // filter po datumu
     public static Specification<Transaction> hasDateBetween(Date startDate, Date endDate) {
         return (root, query, criteriaBuilder) -> {
@@ -47,6 +48,16 @@ public class TransactionSpecification {
         return (root, query, criteriaBuilder) -> {
             query.orderBy(criteriaBuilder.desc(root.get("date")));
             return criteriaBuilder.conjunction();
+        };
+    }
+
+    // po statusu
+    public static Specification<Transaction> hashStatus(Status status) {
+        return (root, query, criteriaBuilder) -> {
+            if (status == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("status"), status);
         };
     }
 
