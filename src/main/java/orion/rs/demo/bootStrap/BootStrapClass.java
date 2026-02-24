@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class BootStrapClass implements CommandLineRunner {
 
+    // klasa se koristi
     // da baza bude inicijalno napunjena kada se pokrene projekat za isprobavanje funkcionalnosti
 
     private final EmployeeRepository employeeRepository;
@@ -29,6 +30,11 @@ public class BootStrapClass implements CommandLineRunner {
         employee.setLastname("Doe");
         employee.setEmail("john.doe@example.com");
 
+        Employee employee2 = new Employee();
+        employee2.setFirstname("Marko");
+        employee2.setLastname("Markovic");
+        employee2.setEmail("marko@example.com");
+
         Account account1 = new Account();
         account1.setType(AccountType.GOLD);
         account1.setBalance(1000.0);
@@ -41,12 +47,21 @@ public class BootStrapClass implements CommandLineRunner {
         account2.setCurrency("EUR");
         account2.setEmployee(employee);
 
-// Dodaj naloge zaposlenom
+        Account account3 = new Account();
+        account3.setType(AccountType.SILVER);
+        account3.setBalance(500.0);
+        account3.setCurrency("AUD");
+        account3.setEmployee(employee);
+
+
         employee.getEmployeeAcounts().add(account1);
         employee.getEmployeeAcounts().add(account2);
+        employee2.getEmployeeAcounts().add(account3);
 
-// Samo snimi zaposlenog, nalozi će se automatski sačuvati
+
         employeeRepository.save(employee);
+        employeeRepository.save(employee2);
+
 
 
 
