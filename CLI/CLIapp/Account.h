@@ -23,8 +23,6 @@ public:
 
     json to_json() const;
 
-    static std::string accountTypeToString(AccountType type);
-
     static bool createAccount(); 
 };
 
