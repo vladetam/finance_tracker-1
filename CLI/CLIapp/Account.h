@@ -19,12 +19,10 @@ private:
 	Employee employee;
 
 public:
-    Account(long id, AccountType type,double balance,const std::string& currency,int version,const Employee& employee);
+	Account(long id, AccountType type, double balance, const std::string& currency, int version, const Employee& employee);
 
-    json to_json() const;
+	json to_json() const;
 
-    static std::string accountTypeToString(AccountType type);
-
-    static bool createAccount(); 
+	static bool createAccount();
 };
 

@@ -39,6 +39,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
         }
     }
 
+    public List<FailedEmployee> getFailedEmployees(){
+        return failedEmployees;
+    }
+
     public boolean checkValid(BulkEmployeeDTO bulkEmployeeDTO){
         return !bulkEmployeeDTO.getEmail().isBlank() && !bulkEmployeeDTO.getLast_name().isBlank()
                 && !bulkEmployeeDTO.getFirst_name().isBlank();
