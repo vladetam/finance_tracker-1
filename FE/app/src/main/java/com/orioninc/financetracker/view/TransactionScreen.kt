@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.orioninc.financetracker.model.Transaction
+import com.orioninc.financetracker.model.Status
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,7 +38,7 @@ fun TransactionScreenRoute(
         onReset = { viewModel.resetFilter() },
         onFilterByEmployee = { viewModel.filterByEmployee(it) },
         onFilterByAccount = { viewModel.filterByAccount(it) },
-        onFilterByCategory = { viewModel.filterByCategory(it) },
+        onFilterByStatus = { viewModel.filterByStatus(it) },
         onFilterByDate = { viewModel.filterByDate(it) }
     )
 }
@@ -51,7 +52,7 @@ fun TransactionScreen(
     onReset: () -> Unit,
     onFilterByEmployee: (Long) -> Unit,
     onFilterByAccount: (Long) -> Unit,
-    onFilterByCategory: (String) -> Unit,
+    onFilterByStatus: (Status) -> Unit,
     onFilterByDate: (Date) -> Unit
 ) {
     val context = LocalContext.current
@@ -78,6 +79,7 @@ fun TransactionScreen(
                         onDismissRequest = { menuExpanded = false }
                     ) {
 
+                        // Date filter
                         DropdownMenuItem(
                             text = { Text("Filter by Date") },
                             onClick = {
@@ -96,6 +98,73 @@ fun TransactionScreen(
                                 ).show()
                             }
                         )
+
+                        Divider()
+
+                        // Status filters
+                        DropdownMenuItem(
+                            text = { Text("Status: Pending") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByStatus(Status.Pending)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Status: Completed") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByStatus(Status.Completed)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Status: Reconciled") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByStatus(Status.Reconciled)
+                            }
+                        )
+
+                        Divider()
+
+                        // Employee filters (example IDs)
+                        DropdownMenuItem(
+                            text = { Text("Employee 1") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByEmployee(1)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Employee 2") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByEmployee(2)
+                            }
+                        )
+
+                        Divider()
+
+                        // Account filters (example IDs)
+                        DropdownMenuItem(
+                            text = { Text("Account 1") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByAccount(1)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Account 2") },
+                            onClick = {
+                                menuExpanded = false
+                                onFilterByAccount(2)
+                            }
+                        )
+
+                        Divider()
 
                         DropdownMenuItem(
                             text = { Text("Show All") },
@@ -156,6 +225,7 @@ fun TransactionItem(
             Text(transaction.description, fontWeight = FontWeight.Bold)
             Text("By: ${transaction.reporter.firstName} ${transaction.reporter.lastName}")
             Text("Amount: ${transaction.amount} RSD", color = Color(0xFF1B5E20))
+            Text("Status: ${transaction.status}")
             Text("Date: ${formatter.format(transaction.date)}")
         }
     }

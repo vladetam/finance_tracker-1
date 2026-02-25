@@ -2,6 +2,7 @@ package com.orioninc.financetracker.view
 
 import androidx.lifecycle.*
 import com.orioninc.financetracker.model.Transaction
+import com.orioninc.financetracker.model.Status
 import com.orioninc.financetracker.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -58,9 +59,9 @@ class TransactionViewModel @Inject constructor(
             _allTransactions.value?.filter { it.account.idAccount == accountId }
     }
 
-    fun filterByCategory(category: String) {
+    fun filterByStatus(status: Status) {
         _filteredTransactions.value =
-            _allTransactions.value?.filter { it.category == category }
+            _allTransactions.value?.filter { it.status == status }
     }
 
     fun filterByDate(selectedDate: Date) {
