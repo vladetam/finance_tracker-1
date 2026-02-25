@@ -22,7 +22,8 @@ json Account::to_json() const {
 
 bool Account::createAccount() {
     std::string balanceStr, currency;
-    int acctyp;
+    std::string acctyp;
+    int num;
     AccountType accType;
 
     std::cout << "\n=== Create Account ===\n";
@@ -32,13 +33,22 @@ bool Account::createAccount() {
         std::cout << " 1. GOLD\n 2. SILVER\n 3. PLATINUM\n";
         std::cout << "Enter number: ";
         std::cin >> acctyp;
+        try {
+            num = std::stoi(acctyp);
+            if (num == 1) { accType = AccountType::GOLD; break; }
+            else if (num == 2) { accType = AccountType::SILVER; break; }
+            else if (num == 3) { accType = AccountType::PLATINUM; break; }
+            else std::cout << "Invalid choice. Please enter 1, 2, or 3.\n";
+        }
+        catch (std::invalid_argument&) {
+            std::cout << "Invalid number\n";
+        }
+        catch (std::out_of_range&) {
+            std::cout << "Number out of range\n";
+        }
 
-        if (acctyp == 1) { accType = AccountType::GOLD; break; }
-        else if (acctyp == 2) { accType = AccountType::SILVER; break; }
-        else if (acctyp == 3) { accType = AccountType::PLATINUM; break; }
-        else std::cout << "Invalid choice. Please enter 1, 2, or 3.\n";
     }
- 
+
     double balance;
     while (true) {
         std::cout << "Balance: ";
@@ -46,13 +56,18 @@ bool Account::createAccount() {
         std::cin.ignore();
 
         std::stringstream ss(balanceStr);
-        if (ss >> balance) break;  
+        if (ss >> balance) break;
         std::cout << "Invalid balance. Please enter a numeric value.\n";
     }
 
     while (true) {
         std::cout << "Currency: ";
         std::getline(std::cin, currency);
+        std::regex pattern("^[A-Za-z]+$");
+        if (!std::regex_match(currency, pattern)) {
+            std::cout << "Invalid input (letters only)\n";
+            continue;
+        }
         if (!currency.empty()) break;
         std::cout << "Currency is mandatory.\n";
     }
@@ -71,6 +86,7 @@ bool Account::createAccount() {
     }
 
     size_t choice;
+    std::string input;
     Employee emp(0, "", "", "");
     while (true) {
         std::cout << "\nSelect an employee to assign:\n";
@@ -83,20 +99,31 @@ bool Account::createAccount() {
         }
 
         std::cout << "Enter number: ";
-        std::cin >> choice;
+        std::cin >> input;
         std::cin.ignore();
 
-        if (choice >= 1 && choice <= jEmployees.size()) {
-            auto selected = jEmployees[choice - 1];
-            emp = Employee(
-                selected["id"].get<long>(),
-                selected["firstname"].get<std::string>(),
-                selected["lastname"].get<std::string>(),
-                selected["email"].get<std::string>()
-            );
-            break;
+        try {
+            choice = std::stoi(input);
+            if (choice >= 1 && choice <= jEmployees.size()) {
+                auto selected = jEmployees[choice - 1];
+                emp = Employee(
+                    selected["id"].get<long>(),
+                    selected["firstname"].get<std::string>(),
+                    selected["lastname"].get<std::string>(),
+                    selected["email"].get<std::string>()
+                );
+                break;
+            }
+            std::cout << "Invalid employee selection. Try again.\n";
         }
-        std::cout << "Invalid employee selection. Try again.\n";
+        catch (std::invalid_argument&) {
+            std::cout << "Invalid number\n";
+        }
+        catch (std::out_of_range&) {
+            std::cout << "Number out of range\n";
+        }
+
+
     }
 
     long newId = 1;
