@@ -141,6 +141,7 @@
     <ClInclude Include="Account.h" />
     <ClInclude Include="AccountType.h" />
     <ClInclude Include="Employee.h" />
+    <ClInclude Include="http.h" />
     <ClInclude Include="Status.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>

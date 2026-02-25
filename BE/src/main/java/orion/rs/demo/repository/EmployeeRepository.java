@@ -7,4 +7,6 @@ import orion.rs.demo.domain.Employee;
 @Repository
 public interface EmployeeRepository
         extends JpaRepository<Employee, Long> {
+
+    boolean existsByEmail(String email);
 }

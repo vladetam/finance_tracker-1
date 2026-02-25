@@ -46,7 +46,7 @@ bool Account::createAccount() {
         catch (std::out_of_range&) {
             std::cout << "Number out of range\n";
         }
-
+        
     }
 
     double balance;
@@ -80,7 +80,7 @@ bool Account::createAccount() {
         empFile.close();
     }
 
-    if (jEmployees.empty()) {
+    if (jEmployees.empty()) { // TODO: dodati api call i proveriti da li postoje podaci na njemu
         std::cout << "No employees found. Please create employees first.\n";
         return false;
     }

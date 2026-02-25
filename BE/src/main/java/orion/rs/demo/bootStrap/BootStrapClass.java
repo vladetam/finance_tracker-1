@@ -11,6 +11,7 @@ import orion.rs.demo.repository.TransactionRepository;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -26,7 +27,6 @@ public class BootStrapClass implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
 
 
         Employee employee = new Employee();
