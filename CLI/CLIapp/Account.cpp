@@ -48,7 +48,7 @@ bool Account::createAccount() {
         }
         
     }
- 
+
     double balance;
     while (true) {
         std::cout << "Balance: ";
@@ -56,7 +56,7 @@ bool Account::createAccount() {
         std::cin.ignore();
 
         std::stringstream ss(balanceStr);
-        if (ss >> balance) break;  
+        if (ss >> balance) break;
         std::cout << "Invalid balance. Please enter a numeric value.\n";
     }
 
@@ -123,7 +123,7 @@ bool Account::createAccount() {
             std::cout << "Number out of range\n";
         }
 
-        
+
     }
 
     long newId = 1;

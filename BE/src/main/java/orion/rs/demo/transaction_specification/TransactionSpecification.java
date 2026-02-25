@@ -29,17 +29,17 @@ public class TransactionSpecification {
 
 
     // filter po datumu
-    public static Specification<Transaction> hasDateBetween(Date startDate, Date endDate) {
+    public static Specification<Transaction> hasDate(Date date) {
         return (root, query, criteriaBuilder) -> {
-            if (startDate == null && endDate == null) {
+            if (date == null) {
                 return criteriaBuilder.conjunction();
-            } else if (startDate != null && endDate != null) {
-                return criteriaBuilder.between(root.get("date"), startDate, endDate);
-            } else if (startDate != null) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("date"), startDate);
-            } else {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("date"), endDate);
             }
+
+            Date startOfDay = new Date(date.getYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+
+            Date endOfDay = new Date(date.getYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+
+            return criteriaBuilder.between(root.get("date"), startOfDay, endOfDay);
         };
     }
 

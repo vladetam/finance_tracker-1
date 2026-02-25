@@ -1,6 +1,9 @@
 package orion.rs.demo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.format.annotation.DateTimeFormat;
 import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.repository.TransactionRepository;
@@ -8,6 +11,7 @@ import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.service.TransactionService;
 import orion.rs.demo.transaction_specification.TransactionSpecification;
 
 import java.util.Date;
@@ -20,14 +24,16 @@ public class TransactionController {
     private final TransactionRepository transactionRepository;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
+    private final TransactionService transactionService;
 
     public TransactionController(
             TransactionRepository transactionRepository,
             EmployeeRepository employeeRepository,
-            AccountRepository accountRepository) {
+            AccountRepository accountRepository, TransactionService transactionService) {
         this.transactionRepository = transactionRepository;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
+        this.transactionService = transactionService;
     }
 
     @PostMapping
@@ -72,23 +78,60 @@ public class TransactionController {
         }
     }
 
+    // filter po id
+    @GetMapping("/{id}")
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id) {
+        return transactionRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTransaction(
+            @PathVariable Long id,
+            @RequestBody Transaction transaction) {
+
+        try {
+            transactionService.updateTrans(id,transaction);
+            return ResponseEntity.status(HttpStatus.OK).build();
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
     @GetMapping
     public List<Transaction> getTransactions(
             @RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) Long accountId,
             @RequestParam(required = false)Status status,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) Date endDate
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            Date date
     ) {
         Specification<Transaction> spec = Specification
                 .where(TransactionSpecification.hasEmployeeID(employeeId))
                 .and(TransactionSpecification.hasAccountId(accountId))
                 .and(TransactionSpecification.hashStatus(status))
-                .and(TransactionSpecification.hasDateBetween(startDate, endDate))
+                .and(TransactionSpecification.hasDate(date))
                 .and(TransactionSpecification.orderByDateDesc());
 
         return transactionRepository.findAll(spec);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
 
+        try {
+            transactionService.deleteTransaction(id);
+            return ResponseEntity.noContent().build();
+
+        } catch (Exception e) {
+            //ako transakcija ne postoji
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).body(e.getMessage());
+            }
+            //sve ostale greške
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 }
