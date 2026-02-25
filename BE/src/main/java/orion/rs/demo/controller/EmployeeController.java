@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import orion.rs.demo.annotations.CheckValidEmail;
 import orion.rs.demo.dto.BulkEmployeeDTO;
 import orion.rs.demo.dto.EmployeeDto;
 import orion.rs.demo.service.EmployeeService;
@@ -58,6 +59,7 @@ public class EmployeeController {
     }
 
 
+    @CheckValidEmail
     @PostMapping(value = "bulkSaveAll",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveOrSkipEmployee(@RequestBody List<BulkEmployeeDTO> bulkEmployeeDTOS){
 
@@ -66,6 +68,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.OK).body("Successfully added employees!" +
                     "Employees that are invalid and failed to add are: " + employeeServiceImpl.getFailedEmployees());
     }
+
 
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportEmployees() {
