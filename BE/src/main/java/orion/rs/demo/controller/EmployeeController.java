@@ -62,7 +62,9 @@ public class EmployeeController {
     public ResponseEntity<?> saveOrSkipEmployee(@RequestBody List<BulkEmployeeDTO> bulkEmployeeDTOS){
 
             employeeServiceImpl.saveOrSkipEmployee(bulkEmployeeDTOS);
-            return ResponseEntity.status(HttpStatus.OK).build();
+
+            return ResponseEntity.status(HttpStatus.OK).body("Successfully added employees!" +
+                    "Employees that are invalid and failed to add are: " + employeeServiceImpl.getFailedEmployees());
     }
 
     @GetMapping("/export")
