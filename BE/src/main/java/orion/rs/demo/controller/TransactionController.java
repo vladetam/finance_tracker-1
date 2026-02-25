@@ -73,6 +73,14 @@ public class TransactionController {
         }
     }
 
+    // filter po id
+    @GetMapping("/{id}")
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable Long id) {
+        return transactionRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping
     public List<Transaction> getTransactions(
             @RequestParam(required = false) Long employeeId,
