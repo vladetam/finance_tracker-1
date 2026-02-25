@@ -13,6 +13,7 @@ import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.EmployeeService;
 import orion.rs.demo.validationObj.FailedEmployee;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,10 @@ public class EmployeeServiceImplementation implements EmployeeService {
                 failedEmployees.add(new FailedEmployee(bulkEmployeeDTOS.get(i), "Validation Failed"));
             }
         }
+    }
+
+    public List<FailedEmployee> getFailedEmployees(){
+        return failedEmployees;
     }
 
     public boolean checkValid(BulkEmployeeDTO bulkEmployeeDTO){
@@ -107,6 +112,25 @@ public class EmployeeServiceImplementation implements EmployeeService {
         dto.setEmail(employee.getEmail());
 
         return dto;
+    }
+
+    @Override
+    public byte[] exportEmployeesToCsv() {
+
+        List<Employee> employees = employeeRepository.findAll();
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("ID,First Name,Last Name,Email\n");
+
+        for (Employee employee : employees) {
+            sb.append(employee.getId()).append(",");
+            sb.append(employee.getFirstname()).append(",");
+            sb.append(employee.getLastname()).append(",");
+            sb.append(employee.getEmail()).append("\n");
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
 }

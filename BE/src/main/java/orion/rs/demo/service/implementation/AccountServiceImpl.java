@@ -8,6 +8,7 @@ import orion.rs.demo.dto.AccountDTO;
 import orion.rs.demo.dto.BulkInsertAccDTO;
 import orion.rs.demo.dto.FailedRecord;
 import orion.rs.demo.exceptionHandling.AccountNotFoundException;
+import orion.rs.demo.exceptionHandling.EmployeeNotFoundException;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.AccountService;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountDTO createAccount(AccountCreateDTO dto) {
         // Validacija zaposlenog
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen."));
+                .orElseThrow(() -> new EmployeeNotFoundException(dto.getEmployeeId()));
         if(!dto.getCurrency().matches("[a-zA-Z]+")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
         }
@@ -67,8 +69,7 @@ public class AccountServiceImpl implements AccountService {
 
         // Validacija zaposlenog
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen"));
+                .orElseThrow(() -> new EmployeeNotFoundException(dto.getEmployeeId()));
 
         if(!dto.getCurrency().matches("[a-zA-Z]+")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
@@ -100,7 +101,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    @Transactional
     public BulkInsertAccDTO bulkInsert(List<AccountCreateDTO> dtos) {
         List<Long> savedIds = new ArrayList<>();
         List<FailedRecord> failedRecords = new ArrayList<>();
@@ -147,7 +147,26 @@ public class AccountServiceImpl implements AccountService {
 
         return new BulkInsertAccDTO(savedIds, failedRecords);
     }
+    @Override
+    public byte[] bulkExportAccToCsv() {
 
+        List<Account> accounts  = accountRepository.findAll();
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("ID,Version,AccountType,Double,Currency,Employee\n");
+
+        for (Account account : accounts) {
+            sb.append(account.getId()).append(",");
+            sb.append(account.getVersion()).append(",");
+            sb.append(account.getType()).append(",");
+            sb.append(account.getBalance()).append(",");
+            sb.append(account.getCurrency()).append(",");
+            sb.append(account.getEmployee().getFirstname()).append(" ").append(account.getEmployee().getLastname()).append("\n");
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
     private AccountDTO mapToDTO(Account account) {
         return new AccountDTO(
                 account.getId(),

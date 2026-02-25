@@ -24,14 +24,27 @@ void main() {
 		cout << "6. Sync Accounts with backend" << endl;
 		cout << "7. Exit" << endl;
 		cout << "=====================================" << endl;
-		int choise;
-		cin >> choise;
-		switch (choise) {
+		std::string choise;
+		int c;
+		while (true) {
+			cin >> choise;
+			try {
+				c = stoi(choise);
+				break;
+			}
+			catch (std::invalid_argument&) {
+				cout << "Wrong input, try again." << endl;
+			}
+			catch (std::out_of_range&) {
+				cout << "Wrong input, try again." << endl;
+			}
+		}
+		switch (c) {
 		case 1:
-			cout << 1;
+			createTransaction();
 			break;
 		case 2:
-			cout << 2;
+			Account::createAccount();
 			break;
 		case 3:
 			createEmployee();

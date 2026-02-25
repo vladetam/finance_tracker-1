@@ -3,13 +3,15 @@ package orion.rs.demo.bootStrap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import orion.rs.demo.domain.Account;
-import orion.rs.demo.domain.AccountType;
-import orion.rs.demo.domain.Employee;
+import orion.rs.demo.domain.*;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
+import orion.rs.demo.repository.TransactionRepository;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -21,9 +23,11 @@ public class BootStrapClass implements CommandLineRunner {
 
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     @Override
     public void run(String... args) throws Exception {
+
 
         Employee employee = new Employee();
         employee.setFirstname("john.doe");
@@ -96,7 +100,16 @@ public class BootStrapClass implements CommandLineRunner {
         employeeRepository.save(employee2);
 
 
+        Transaction trans = new Transaction();
+        trans.setCategory("hihi");
+        trans.setDescription("hahaha");
+        trans.setAmount(BigDecimal.valueOf(1234567.876));
+        trans.setDate(new Date());
+        trans.setAccount(account1);
+        trans.setStatus(Status.COMPLETED);
+        trans.setReporter(employee);
 
+        transactionRepository.save(trans);
 
         }
 
