@@ -134,6 +134,7 @@
     <ClCompile Include="AccountType.cpp" />
     <ClCompile Include="CLIapp.cpp" />
     <ClCompile Include="Employee.cpp" />
+    <ClCompile Include="http.cpp" />
     <ClCompile Include="Status.cpp" />
     <ClCompile Include="Transaction.cpp" />
   </ItemGroup>
@@ -141,6 +142,7 @@
     <ClInclude Include="Account.h" />
     <ClInclude Include="AccountType.h" />
     <ClInclude Include="Employee.h" />
+    <ClInclude Include="http.h" />
     <ClInclude Include="Status.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
