@@ -9,3 +9,12 @@ std::string accTypeToString(AccountType at)
     }
     return "";
 }
+
+AccountType stringToAccType(const std::string& str)
+{
+    if (str == "GOLD") return AccountType::GOLD;
+    if (str == "SILVER") return AccountType::SILVER;
+    if (str == "PLATINUM") return AccountType::PLATINUM;
+
+    throw std::invalid_argument("Invalid account type string");
+}

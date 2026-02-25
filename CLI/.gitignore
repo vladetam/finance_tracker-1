@@ -371,3 +371,5 @@ CLIapp/vcpkg.json
 
 # runtime data
 CLIapp/employees.json
+CLIapp/accounts.json
+CLIapp/transactions.json

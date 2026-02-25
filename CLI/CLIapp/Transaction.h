@@ -17,26 +17,32 @@ private:
 	long long amount;
 	std::string category;
 	Status status;
-
-	std::string timePointToString(std::chrono::system_clock::time_point tp)
-	{
-		std::time_t t = std::chrono::system_clock::to_time_t(tp);
-
-		std::tm tm{};
-		gmtime_s(&tm, &t);
-
-		std::stringstream ss;
-		ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%SZ");
-		return ss.str();
-	}
-	std::chrono::system_clock::time_point stringToTimePoint(const std::string& str)
-	{
-		std::istringstream iss(str);
-		std::chrono::system_clock::time_point tp;
-
-		iss >> std::chrono::parse("%Y-%m-%d %H:%M:%SZ", tp);//"%Y-%m-%dT%H:%M:%SZ"
-
-		return tp;
-	}
+public:
+    Transaction(long id,
+        const Employee& reporter,
+        const Account& account,
+        const std::string& description,
+        int version,
+        std::chrono::system_clock::time_point timestamp,
+        long long amount,
+        const std::string& category,
+        Status status)
+        : id(id),
+        reporter(reporter),
+        account(account),
+        description(description),
+        version(version),
+        now(timestamp),
+        amount(amount),
+        category(category),
+        status(status)
+    {
+    }
+    json to_json() const;
 };
 
+bool createTransaction();
+
+std::string timePointToString(std::chrono::system_clock::time_point tp);
+
+std::chrono::system_clock::time_point stringToTimePoint(const std::string& str);
