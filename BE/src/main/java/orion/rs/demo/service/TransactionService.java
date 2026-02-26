@@ -1,9 +1,11 @@
 package orion.rs.demo.service;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import orion.rs.demo.domain.*;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
 import orion.rs.demo.dto.CreateTransactionDTO;
@@ -43,37 +45,49 @@ public class TransactionService {
 
 
 
-    public Transaction updateTrans(Long id, Transaction transaction) throws Exception {
+    public Transaction updateTrans(Long id, UpdateTransactionDTO transaction) throws Exception {
 
         // 1. Provera da li transakcija postoji u bazi
         Transaction existingTransaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new Exception("Transaction not found with id: " + id));
 
         // 2. Provera da li Employee postoji (ako je poslat novi)
-        if (transaction.getReporter() != null &&
-                transaction.getReporter().getId() != null) {
-            if (!employeeRepository.existsById(transaction.getReporter().getId())) {
-                throw new Exception("Employee does not exist");
-            }
-            existingTransaction.setReporter(transaction.getReporter());
-        }
+        Employee reporter = employeeRepository.findById(transaction.getReporterId())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Employee does not exist"
+                        )
+                );
+        existingTransaction.setReporter(reporter);
 
         // 3. Provera da li Account postoji (ako je poslat novi)
-        if (transaction.getAccount() != null &&
-                transaction.getAccount().getId() != null) {
-            if (!accountRepository.existsById(transaction.getAccount().getId())) {
-                throw new Exception("Account does not exist");
-            }
-            existingTransaction.setAccount(transaction.getAccount());
-        }
+        Account account = accountRepository.findById(transaction.getAccountId())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Account does not exist"
+                        )
+                );
+        existingTransaction.setAccount(account);
 
         // Provera da li je bilo sta upisano u polja
         if (transaction.getDescription() != null) {
             existingTransaction.setDescription(transaction.getDescription());
         }
 
-        if (transaction.getDate() != null) {
-            existingTransaction.setDate(transaction.getDate());
+        try {
+            SimpleDateFormat formatter =
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            Date parsedDate = formatter.parse(transaction.getDate());
+            existingTransaction.setDate(parsedDate);
+
+        } catch (ParseException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Neispravan format datuma"
+            );
         }
 
 
@@ -87,15 +101,21 @@ public class TransactionService {
         }
 
 
-        if (transaction.getStatus() != null) {
-            existingTransaction.setStatus(transaction.getStatus());
+        try {
+            Status status = Status.valueOf(transaction.getStatus());
+            existingTransaction.setStatus(status);
+
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Neispravan status"
+            );
         }
 
 
         try {
             // 6. Sačuvaj izmene
-            Transaction updated = transactionRepository.save(existingTransaction);
-            return updated;
+            return transactionRepository.save(existingTransaction);
 
         } catch (Exception e) {
             throw new Exception("Database error while updating transaction: " + e.getMessage());

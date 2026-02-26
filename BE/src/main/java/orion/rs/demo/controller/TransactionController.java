@@ -11,6 +11,7 @@ import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
 import orion.rs.demo.dto.CreateTransactionDTO;
+import orion.rs.demo.dto.UpdateTransactionDTO;
 import orion.rs.demo.repository.TransactionRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
@@ -128,7 +129,7 @@ public class TransactionController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTransaction(
             @PathVariable Long id,
-            @RequestBody Transaction transaction) {
+            @Valid @RequestBody UpdateTransactionDTO transaction) {
 
         try {
             transactionService.updateTrans(id,transaction);

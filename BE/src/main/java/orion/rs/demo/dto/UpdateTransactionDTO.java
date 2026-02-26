@@ -21,14 +21,23 @@ public class UpdateTransactionDTO {
     private String description;
 
     @NotNull
-    private Date date;
+    @Pattern(regexp = "^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]) (0\\d|1\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$",
+            message = "Datum mora da bude u formatu: %YYYY-%MM-%DD HH:MM:SS")
+    private String date;
 
     @NotNull
+    @PositiveOrZero(message = "Amount mora biti >= 0!")
     private BigDecimal amount;
 
-    @NotBlank
+    @NotNull
+    @NotBlank(message = "Kategorija ne sme biti prazna!")
+    @Pattern(regexp = "^[A-Za-z]+$", message = "Category mora sadrzati samo slova")
     private String category;
 
     @NotNull
-    private Status status;
+    @Pattern(
+            regexp = "^(COMPLETED|PENDING|RECONCILED)$",
+            message = "Status mora da bude jedan od sledecih opcija: COMPLETED, PENDING, RECONCILED"
+    )
+    private String status;
 }
