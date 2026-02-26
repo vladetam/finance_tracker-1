@@ -208,7 +208,7 @@ fun TransactionScreen(
 
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false; showUpdateDialog}
+                        onClick = { showActionDialog = false; showUpdateDialog = true}
                     ) { Text("Update Transaction") }
                 }
             },
@@ -517,6 +517,7 @@ fun TransactionScreen(
                             category = category,
                             status = selectedStatus
                         )
+                        Log.d("DEBUG",""+dto.reporter+dto.account+dto.description+dto.date+dto.amount+dto.category+dto.status)
 
                         onUpdateTransaction(selectedTransaction!!.idTransaction, dto)
                         showUpdateDialog = false

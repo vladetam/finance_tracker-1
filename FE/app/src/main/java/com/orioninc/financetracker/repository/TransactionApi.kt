@@ -30,5 +30,5 @@ interface TransactionApi {
     suspend fun updateTransaction(
         @Path("id") id: Long,
         @Body dto: TransactionCreateDTO
-    )
+    ) : Response<Unit>
 }
