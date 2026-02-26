@@ -1,8 +1,11 @@
 package com.orioninc.financetracker.view
 
 import androidx.lifecycle.*
+import com.orioninc.financetracker.model.Account
+import com.orioninc.financetracker.model.Employee
 import com.orioninc.financetracker.model.Transaction
 import com.orioninc.financetracker.model.Status
+import com.orioninc.financetracker.model.TransactionCreateDTO
 import com.orioninc.financetracker.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -39,6 +42,20 @@ class TransactionViewModel @Inject constructor(
                 _error.value = null
             } catch (e: Exception) {
                 _error.value = "Cannot connect to server"
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+    fun createTransaction(transaction: TransactionCreateDTO) {
+        viewModelScope.launch {
+            try {
+                _loading.value = true
+                repository.createTransaction(transaction)
+                loadTransactions()
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = "Cannot create transaction: ${e.message}"
             } finally {
                 _loading.value = false
             }

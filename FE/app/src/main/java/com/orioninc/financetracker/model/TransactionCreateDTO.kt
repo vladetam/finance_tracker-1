@@ -4,21 +4,16 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 import java.util.Date
 
-enum class Status { PENDING, COMPLETED, RECONCILED}
 
-data class Transaction(
-    @SerializedName("id")
-    val idTransaction: Long,
-    @SerializedName("reporter")
-    val reporter: Employee,
-    @SerializedName("account")
-    val account: Account,
+data class TransactionCreateDTO(
+    @SerializedName("reporterId")
+    val reporter: Long,
+    @SerializedName("accountId")
+    val account: Long,
     @SerializedName("description")
     val description: String,
-    @SerializedName("version")
-    val version: Int,
     @SerializedName("date")
-    val date: Date,
+    val date: String,
     @SerializedName("amount")
     val amount: Double,
     @SerializedName("category")

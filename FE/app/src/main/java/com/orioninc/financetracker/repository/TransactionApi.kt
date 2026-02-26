@@ -1,6 +1,7 @@
 package com.orioninc.financetracker.repository
 
 import com.orioninc.financetracker.model.Transaction
+import com.orioninc.financetracker.model.TransactionCreateDTO
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -12,7 +13,7 @@ interface TransactionApi {
 
 
     @POST("transactions")
-    suspend fun createTransaction(@Body transaction: Transaction): Response<Transaction>
+    suspend fun createTransaction(@Body transaction: TransactionCreateDTO): Response<TransactionCreateDTO>
 
 
     @PUT("transactions/{id}")

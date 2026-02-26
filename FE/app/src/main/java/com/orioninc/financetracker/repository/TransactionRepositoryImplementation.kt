@@ -1,6 +1,7 @@
 package com.orioninc.financetracker.repository
 
 import com.orioninc.financetracker.model.Transaction
+import com.orioninc.financetracker.model.TransactionCreateDTO
 import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,10 +20,10 @@ class TransactionRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun createTransaction(transaction: Transaction): Transaction {
+    override suspend fun createTransaction(transaction: TransactionCreateDTO) {
         val response = api.createTransaction(transaction)
         if (response.isSuccessful) {
-            return response.body()!!
+//            return response.body()!!
         } else {
             throw HttpException(response)
         }
@@ -41,4 +42,10 @@ class TransactionRepositoryImplementation @Inject constructor(
             throw HttpException(response)
         }
     }
+
+
+//    override suspend fun createTransaction2(transaction: TransactionCreateDTO) {
+//        TransactionApi.createTransaction(transaction)
+//    }
+
 }
