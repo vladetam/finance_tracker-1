@@ -30,6 +30,10 @@ public class TransactionService {
         this.accountRepository = accountRepository;
     }
 
+    public List<Transaction> getAllTransaction(){
+        return transactionRepository.findAll();
+    }
+
     public Transaction updateTrans(Long id, Transaction transaction) throws Exception {
 
         // 1. Provera da li transakcija postoji u bazi
