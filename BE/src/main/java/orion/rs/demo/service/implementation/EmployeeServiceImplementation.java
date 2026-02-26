@@ -53,8 +53,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
     public EmployeeDto create(EmployeeDto dto) {
 
         Employee employee = new Employee();
-        employee.setFirstname(dto.getFirstName());
-        employee.setLastname(dto.getLastName());
+        employee.setFirstname(dto.getFirstname());
+        employee.setLastname(dto.getLastname());
         employee.setEmail(dto.getEmail());
 
         Employee saved = employeeRepository.save(employee);
@@ -84,8 +84,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
 
-        employee.setFirstname(dto.getFirstName());
-        employee.setLastname(dto.getLastName());
+        employee.setFirstname(dto.getFirstname());
+        employee.setLastname(dto.getLastname());
         employee.setEmail(dto.getEmail());
 
         Employee updated = employeeRepository.save(employee);
@@ -107,8 +107,8 @@ public class EmployeeServiceImplementation implements EmployeeService {
 
         EmployeeDto dto = new EmployeeDto();
         dto.setId(employee.getId());
-        dto.setFirstName(employee.getFirstname());
-        dto.setLastName(employee.getLastname());
+        dto.setFirstname(employee.getFirstname());
+        dto.setLastname(employee.getLastname());
         dto.setEmail(employee.getEmail());
 
         return dto;
