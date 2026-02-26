@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.service.TransactionService;
 import orion.rs.demo.transaction_specification.TransactionSpecification;
+
+import java.util.Arrays;
 import  java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -143,5 +145,16 @@ public class TransactionController {
 
         Map<String, Object> result = transactionService.bulkInsertTransactions(dtos);
         return ResponseEntity.ok(result);
+    }
+    @GetMapping("/bulk")
+    public ResponseEntity<byte[]> bulkExport(){
+
+        byte[] data = transactionService.exportAllTrToCSV();
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .header("Content-Disposition","attachment; filename=\"transactions.csv\"")
+                .body(data);
+
     }
 }

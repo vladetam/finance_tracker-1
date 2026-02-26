@@ -1,34 +1,28 @@
 package orion.rs.demo.service;
 
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import orion.rs.demo.domain.*;
+import orion.rs.demo.dto.BulkExportTransactionDTO;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
 import orion.rs.demo.dto.TransactionDTO;
-import orion.rs.demo.dto.UpdateTransactionDTO;
+import orion.rs.demo.mapper.ExportBulkTransactionMapper;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.TransactionRepository;
 import java.math.BigDecimal;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
-
-    public TransactionService(
-            TransactionRepository transactionRepository,
-            EmployeeRepository employeeRepository,
-            AccountRepository accountRepository) {
-        this.transactionRepository = transactionRepository;
-        this.employeeRepository = employeeRepository;
-        this.accountRepository = accountRepository;
-    }
 
     public Transaction updateTrans(Long id, Transaction transaction) throws Exception {
 
@@ -233,6 +227,27 @@ public class TransactionService {
         result.put("failedRecords", failedRecords);
         return result;
     }
+    public byte[] exportAllTrToCSV(){
+        List<Transaction> lista = transactionRepository.findAll();
+        return allTrDataToCsv(lista);
+    }
+    public byte[]  allTrDataToCsv(List<Transaction> listOfTransactions) {
 
-
+        List<BulkExportTransactionDTO> dtos = listOfTransactions.stream()
+                .map(ExportBulkTransactionMapper::toBulkDto)
+                .toList();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("id,reporterName,description,amount,category,status,dateTimeUtc\n");
+        for(BulkExportTransactionDTO dto : dtos){
+            stringBuilder.append(dto.getId()).append(",")
+                    .append(dto.getReporterFirstName())
+                    .append(" ").append(dto.getReporterLastName()).append(",")
+                    .append(dto.getDescription()).append(",")
+                    .append(dto.getAmount()).append(",")
+                    .append(dto.getCategory()).append(",")
+                    .append(dto.getStatus()).append(",")
+                    .append(dto.getDateTimeUtc()).append("\n");
+        }
+        return stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
+    }
 }
