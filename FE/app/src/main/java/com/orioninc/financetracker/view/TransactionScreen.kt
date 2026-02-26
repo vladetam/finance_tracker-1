@@ -1,16 +1,14 @@
 package com.orioninc.financetracker.view
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -21,14 +19,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.orioninc.financetracker.model.Account
-import com.orioninc.financetracker.model.Employee
-import com.orioninc.financetracker.model.Status
-import com.orioninc.financetracker.model.Transaction
-import com.orioninc.financetracker.model.TransactionCreateDTO
+import com.orioninc.financetracker.model.*
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,12 +53,9 @@ fun TransactionScreenRoute(
         onFilterByAccount = { transactionViewModel.filterByAccount(it) },
         onFilterByStatus = { transactionViewModel.filterByStatus(it) },
         onFilterByDate = { transactionViewModel.filterByDate(it) },
-        onCreateTransaction = { dto: TransactionCreateDTO ->
-            transactionViewModel.createTransaction(dto)
-        },
-        onUpdateTransaction = { id, dto ->
-            transactionViewModel.updateTransaction(id, dto)
-        }
+        onCreateTransaction = { transactionViewModel.createTransaction(it) },
+        onUpdateTransaction = { id, dto -> transactionViewModel.updateTransaction(id, dto) },
+        onDeleteTransaction = { id -> transactionViewModel.deleteTransaction(id) }
     )
 }
 
@@ -83,20 +73,23 @@ fun TransactionScreen(
     onFilterByStatus: (Status) -> Unit,
     onFilterByDate: (Date) -> Unit,
     onCreateTransaction: (TransactionCreateDTO) -> Unit,
-    onUpdateTransaction: (Long, TransactionCreateDTO) -> Unit
-)  {
+    onUpdateTransaction: (Long, TransactionCreateDTO) -> Unit,
+    onDeleteTransaction: (Long) -> Unit
+) {
     val context = LocalContext.current
     val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
     var menuExpanded by remember { mutableStateOf(false) }
-
-    var showActionDialog by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
+    var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+
     var showEmployeeDialog by remember { mutableStateOf(false) }
     var showAccountDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
-    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
-    var showUpdateDialog by remember { mutableStateOf(false) }
 
     val softDarkGray = Color(0xFF373737)
     val concreteLightGray = Color(0xFFE0E0E0)
@@ -104,69 +97,41 @@ fun TransactionScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Finance Tracker", color = Color.White) },
+                title = { Text("Finance Tracker", color = Color.White, fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = softDarkGray),
                 actions = {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = Color.White)
                     }
-
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(text = { Text("Show All") }, onClick = { menuExpanded = false; onReset() })
                         DropdownMenuItem(text = { Text("Filter by Date") }, onClick = {
                             menuExpanded = false
                             val cal = Calendar.getInstance()
-                            DatePickerDialog(
-                                context,
-                                { _, y, m, d ->
-                                    val selected = Calendar.getInstance()
-                                    selected.set(y, m, d)
-                                    onFilterByDate(selected.time)
-                                },
-                                cal.get(Calendar.YEAR),
-                                cal.get(Calendar.MONTH),
-                                cal.get(Calendar.DAY_OF_MONTH)
-                            ).show()
+                            DatePickerDialog(context, { _, y, m, d ->
+                                val selected = Calendar.getInstance().apply { set(y, m, d) }
+                                onFilterByDate(selected.time)
+                            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
                         })
-                        DropdownMenuItem(text = { Text("Filter by Status") }, onClick = {
-                            menuExpanded = false
-                            showStatusDialog = true
-                        })
-                        DropdownMenuItem(text = { Text("Filter by Account") }, onClick = {
-                            menuExpanded = false
-                            showAccountDialog = true
-                        })
-                        DropdownMenuItem(text = { Text("Filter by Employee") }, onClick = {
-                            menuExpanded = false
-                            showEmployeeDialog = true
-                        })
+                        DropdownMenuItem(text = { Text("Filter by Status") }, onClick = { menuExpanded = false; showStatusDialog = true })
+                        DropdownMenuItem(text = { Text("Filter by Account") }, onClick = { menuExpanded = false; showAccountDialog = true })
+                        DropdownMenuItem(text = { Text("Filter by Employee") }, onClick = { menuExpanded = false; showEmployeeDialog = true })
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showActionDialog = true },
-                containerColor = softDarkGray
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction", tint = Color.White)
+            FloatingActionButton(onClick = { showCreateDialog = true }, containerColor = softDarkGray) {
+                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize().background(Color.White)) {
             if (loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
 
-            LazyColumn {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(transactions) { transaction ->
                     TransactionItem(
                         transaction = transaction,
@@ -175,423 +140,71 @@ fun TransactionScreen(
                         onEditClick = {
                             selectedTransaction = transaction
                             showUpdateDialog = true
+                        },
+                        onDeleteClick = {
+                            transactionToDelete = transaction
+                            showDeleteConfirmation = true
                         }
                     )
                 }
             }
 
             error?.let {
-                Text(
-                    text = it,
-                    color = Color.Red,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
-                )
+                Text(text = it, color = Color.Red, modifier = Modifier.align(Alignment.TopCenter).padding(16.dp))
             }
         }
     }
 
-    if (showActionDialog) {
+    if (showDeleteConfirmation && transactionToDelete != null) {
         AlertDialog(
-            onDismissRequest = { showActionDialog = false },
-            title = { Text("Actions") },
-            text = {
-                Column {
-                    Button(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false; showCreateDialog = true }
-                    ) { Text("Create Transaction") }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false; }
-                    ) { Text("Delete Transaction") }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false; showUpdateDialog = true}
-                    ) { Text("Update Transaction") }
-                }
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Transaction") },
+            text = { Text("Are you sure you want to delete ${transactionToDelete?.description}?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteTransaction(transactionToDelete!!.idTransaction)
+                    showDeleteConfirmation = false
+                }) { Text("Delete", color = Color.Red) }
             },
-            confirmButton = { TextButton(onClick = { showActionDialog = false }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { showDeleteConfirmation = false }) { Text("Cancel") } }
         )
     }
 
     if (showCreateDialog) {
-        var description by remember { mutableStateOf("") }
-        var amount by remember { mutableStateOf("") }
-        var category by remember { mutableStateOf("") }
-        var selectedStatus by remember { mutableStateOf(Status.PENDING) }
-        var selectedDate by remember { mutableStateOf(Date()) }
-
-        var expandedEmployee by remember { mutableStateOf(false) }
-        var selectedEmployee by remember { mutableStateOf<Employee?>(null) }
-
-        var expandedAccount by remember { mutableStateOf(false) }
-        var selectedAccount by remember { mutableStateOf<Account?>(null) }
-
-        AlertDialog(
-            onDismissRequest = { showCreateDialog = false },
-            title = { Text("Create Transaction") },
-            text = {
-                Column {
-                    OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
-                    OutlinedTextField(value = amount, onValueChange = { amount = it }, label = { Text("Amount") })
-                    OutlinedTextField(value = category, onValueChange = { category = it }, label = { Text("Category") })
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(onClick = {
-                        val cal = Calendar.getInstance()
-                        DatePickerDialog(
-                            context,
-                            { _, y, m, d ->
-                                val selected = Calendar.getInstance()
-                                selected.set(y, m, d)
-                                selectedDate = selected.time
-                            },
-                            selectedDate.year + 1900,
-                            selectedDate.month,
-                            selectedDate.date
-                        ).show()
-                    }) {
-                        Text("Select Date: ${SimpleDateFormat("dd/MM/yyyy").format(selectedDate)}")
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Column {
-                        Status.values().forEach { status ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(selected = selectedStatus == status, onClick = { selectedStatus = status })
-                                Text(status.name)
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ExposedDropdownMenuBox(
-                        expanded = expandedEmployee,
-                        onExpandedChange = { expandedEmployee = !expandedEmployee }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedEmployee?.let { "${it.firstName} ${it.lastName}" } ?: "",
-                            onValueChange = {},
-                            label = { Text("Select Employee") },
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEmployee) },
-                            modifier = Modifier.menuAnchor()
-                        )
-                        DropdownMenu(
-                            expanded = expandedEmployee,
-                            onDismissRequest = { expandedEmployee = false },
-                            modifier = Modifier.heightIn(max = 300.dp)
-                        ) {
-                            employees.forEach { employee ->
-                                DropdownMenuItem(
-                                    text = { Text("${employee.firstName} ${employee.lastName}") },
-                                    onClick = {
-                                        selectedEmployee = employee
-                                        expandedEmployee = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ExposedDropdownMenuBox(
-                        expanded = expandedAccount,
-                        onExpandedChange = { expandedAccount = !expandedAccount }
-                    ) {
-                        OutlinedTextField(
-                            value = selectedAccount?.let { "ID: ${it.idAccount}" } ?: "",
-                            onValueChange = {},
-                            label = { Text("Select Account") },
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAccount) },
-                            modifier = Modifier.menuAnchor()
-                        )
-                        DropdownMenu(
-                            expanded = expandedAccount,
-                            onDismissRequest = { expandedAccount = false },
-                            modifier = Modifier.heightIn(max = 300.dp)
-                        ) {
-                            accounts.forEach { account ->
-                                DropdownMenuItem(
-                                    text = { Text("ID: ${account.idAccount}") },
-                                    onClick = {
-                                        selectedAccount = account
-                                        expandedAccount = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (selectedEmployee != null && selectedAccount != null) {
-                        val dto = TransactionCreateDTO(
-                            reporter = selectedEmployee!!.idEmployee,
-                            account = selectedAccount!!.idAccount,
-                            description = description,
-                            date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(selectedDate),
-                            amount = amount.toDoubleOrNull() ?: 0.0,
-                            category = category,
-                            status = selectedStatus
-                        )
-                        Log.d("DEBUG",""+dto.reporter+dto.account+dto.description+dto.date+dto.amount+dto.category+dto.status)
-                        onCreateTransaction(dto)
-                        showCreateDialog = false
-                    } else {
-                        Toast.makeText(context, "Select employee and account", Toast.LENGTH_SHORT).show()
-                    }
-                }) { Text("Create") }
-            },
-            dismissButton = { TextButton(onClick = { showCreateDialog = false }) { Text("Cancel") } }
+        TransactionEntryDialog(
+            title = "New Transaction",
+            employees = employees,
+            accounts = accounts,
+            onDismiss = { showCreateDialog = false },
+            onConfirm = { dto ->
+                onCreateTransaction(dto)
+                showCreateDialog = false
+            }
         )
     }
 
     if (showUpdateDialog && selectedTransaction != null) {
-
-
-        var description by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.description)
-        }
-
-        var amount by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.amount.toString())
-        }
-
-        var category by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.category)
-        }
-
-        var selectedStatus by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.status)
-        }
-
-        var selectedDate by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.date)
-        }
-
-        var expandedEmployee by remember { mutableStateOf(false) }
-
-        var selectedEmployee by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.reporter)
-        }
-
-        var expandedAccount by remember { mutableStateOf(false) }
-
-        var selectedAccount by remember(selectedTransaction) {
-            mutableStateOf(selectedTransaction!!.account)
-        }
-//        var description by remember { mutableStateOf(selectedTransaction!!.description) }
-//        var amount by remember { mutableStateOf(selectedTransaction!!.amount.toString()) }
-//        var category by remember { mutableStateOf(selectedTransaction!!.category) }
-//        var selectedStatus by remember { mutableStateOf(selectedTransaction!!.status) }
-//        var selectedDate by remember { mutableStateOf(selectedTransaction!!.date) }
-//
-//        var expandedEmployee by remember { mutableStateOf(false) }
-//        var selectedEmployee by remember { mutableStateOf(selectedTransaction!!.reporter) }
-//
-//        var expandedAccount by remember { mutableStateOf(false) }
-//        var selectedAccount by remember { mutableStateOf(selectedTransaction!!.account) }
-
-        AlertDialog(
-            onDismissRequest = { showUpdateDialog = false },
-            title = { Text("Update Transaction") },
-            text = {
-                Column {
-
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text("Description") }
-                    )
-
-                    OutlinedTextField(
-                        value = amount,
-                        onValueChange = { amount = it },
-                        label = { Text("Amount") }
-                    )
-
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = { category = it },
-                        label = { Text("Category") }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Column {
-                        Status.values().forEach { status ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(
-                                    selected = selectedStatus == status,
-                                    onClick = { selectedStatus = status }
-                                )
-                                Text(status.name)
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ExposedDropdownMenuBox(
-                        expanded = expandedEmployee,
-                        onExpandedChange = { expandedEmployee = !expandedEmployee }
-                    ) {
-                        OutlinedTextField(
-                            value = "${selectedEmployee.firstName} ${selectedEmployee.lastName}",
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Select Employee") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEmployee)
-                            },
-                            modifier = Modifier.menuAnchor()
-                        )
-
-                        DropdownMenu(
-                            expanded = expandedEmployee,
-                            onDismissRequest = { expandedEmployee = false }
-                        ) {
-                            employees.forEach { employee ->
-                                DropdownMenuItem(
-                                    text = { Text("${employee.firstName} ${employee.lastName}") },
-                                    onClick = {
-                                        selectedEmployee = employee
-                                        expandedEmployee = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ExposedDropdownMenuBox(
-                        expanded = expandedAccount,
-                        onExpandedChange = { expandedAccount = !expandedAccount }
-                    ) {
-                        OutlinedTextField(
-                            value = "ID: ${selectedAccount.idAccount}",
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Select Account") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAccount)
-                            },
-                            modifier = Modifier.menuAnchor()
-                        )
-
-                        DropdownMenu(
-                            expanded = expandedAccount,
-                            onDismissRequest = { expandedAccount = false }
-                        ) {
-                            accounts.forEach { account ->
-                                DropdownMenuItem(
-                                    text = { Text("ID: ${account.idAccount}") },
-                                    onClick = {
-                                        selectedAccount = account
-                                        expandedAccount = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (selectedEmployee != null && selectedAccount != null) {
-
-                        val dto = TransactionCreateDTO(
-                            reporter = selectedEmployee.idEmployee,
-                            account = selectedAccount.idAccount,
-                            description = description,
-                            date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(selectedDate),
-                            amount = amount.toDoubleOrNull() ?: 0.0,
-                            category = category,
-                            status = selectedStatus
-                        )
-                        Log.d("DEBUG",""+dto.reporter+dto.account+dto.description+dto.date+dto.amount+dto.category+dto.status)
-
-                        onUpdateTransaction(selectedTransaction!!.idTransaction, dto)
-                        showUpdateDialog = false
-                    }
-                }) {
-                    Text("Update")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUpdateDialog = false }) {
-                    Text("Cancel")
-                }
+        TransactionEntryDialog(
+            title = "Update Transaction",
+            initialTransaction = selectedTransaction,
+            employees = employees,
+            accounts = accounts,
+            onDismiss = { showUpdateDialog = false },
+            onConfirm = { dto ->
+                onUpdateTransaction(selectedTransaction!!.idTransaction, dto)
+                showUpdateDialog = false
             }
         )
     }
 
     if (showEmployeeDialog) {
-        AlertDialog(
-            onDismissRequest = { showEmployeeDialog = false },
-            title = { Text("Select Employee") },
-            text = {
-                Column {
-                    employees.forEach { employee ->
-                        TextButton(
-                            onClick = { onFilterByEmployee(employee.idEmployee); showEmployeeDialog = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("${employee.firstName} ${employee.lastName}")
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { showEmployeeDialog = false }) { Text("Cancel") } }
-        )
+        FilterListDialog("Employee", employees.map { it.idEmployee to "${it.firstName} ${it.lastName}" }, { onFilterByEmployee(it) }, { showEmployeeDialog = false })
     }
-
     if (showAccountDialog) {
-        AlertDialog(
-            onDismissRequest = { showAccountDialog = false },
-            title = { Text("Select Account") },
-            text = {
-                Column {
-                    accounts.forEach { account ->
-                        TextButton(
-                            onClick = { onFilterByAccount(account.idAccount); showAccountDialog = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("ID: ${account.idAccount}")
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { showAccountDialog = false }) { Text("Cancel") } }
-        )
+        FilterListDialog("Account", accounts.map { it.idAccount to "ID: ${it.idAccount}" }, { onFilterByAccount(it) }, { showAccountDialog = false })
     }
-
     if (showStatusDialog) {
-        AlertDialog(
-            onDismissRequest = { showStatusDialog = false },
-            title = { Text("Select Status") },
-            text = {
-                Column {
-                    Status.values().forEach { status ->
-                        TextButton(
-                            onClick = { onFilterByStatus(status); showStatusDialog = false },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(status.name)
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { showStatusDialog = false }) { Text("Cancel") } }
-        )
+        FilterListDialog("Status", Status.values().map { it.ordinal.toLong() to it.name }, { onFilterByStatus(Status.values()[it.toInt()]) }, { showStatusDialog = false })
     }
 }
 
@@ -600,31 +213,191 @@ fun TransactionItem(
     transaction: Transaction,
     formatter: SimpleDateFormat,
     cardColor: Color,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(transaction.description, fontWeight = FontWeight.Bold)
-
-                IconButton(onClick = { onEditClick() }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(transaction.description, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Row {
+                    IconButton(onClick = onEditClick) { Icon(Icons.Default.Edit, contentDescription = null) }
+                    IconButton(onClick = onDeleteClick) { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFB00020)) }
                 }
             }
-
             Text("By: ${transaction.reporter.firstName} ${transaction.reporter.lastName}")
-            Text("Amount: ${transaction.amount} RSD", color = Color(0xFF1B5E20))
-            Text("Status: ${transaction.status}")
-            Text("Date: ${formatter.format(transaction.date)}")
+            Text("Amount: ${transaction.amount} RSD", color = Color(0xFF1B5E20), fontWeight = FontWeight.Bold)
+            Text("Status: ${transaction.status}", style = MaterialTheme.typography.labelMedium)
+            Text("Date: ${formatter.format(transaction.date)}", style = MaterialTheme.typography.labelSmall)
         }
     }
+}
+
+@Composable
+fun FilterListDialog(title: String, items: List<Pair<Long, String>>, onSelect: (Long) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            LazyColumn {
+                items(items) { item ->
+                    TextButton(onClick = { onSelect(item.first); onDismiss() }, modifier = Modifier.fillMaxWidth()) {
+                        Text(item.second)
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionEntryDialog(
+    title: String,
+    initialTransaction: Transaction? = null,
+    employees: List<Employee>,
+    accounts: List<Account>,
+    onDismiss: () -> Unit,
+    onConfirm: (TransactionCreateDTO) -> Unit
+) {
+    val context = LocalContext.current
+    var description by remember { mutableStateOf(initialTransaction?.description ?: "") }
+    var amount by remember { mutableStateOf(initialTransaction?.amount?.toString() ?: "") }
+    var category by remember { mutableStateOf(initialTransaction?.category ?: "") }
+    var selectedStatus by remember { mutableStateOf(initialTransaction?.status ?: Status.PENDING) }
+    var selectedDate by remember { mutableStateOf(initialTransaction?.date ?: Date()) }
+    var selectedEmployee by remember { mutableStateOf(initialTransaction?.reporter ?: employees.firstOrNull()) }
+    var selectedAccount by remember { mutableStateOf(initialTransaction?.account ?: accounts.firstOrNull()) }
+
+    var employeeExpanded by remember { mutableStateOf(false) }
+    var accountExpanded by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    label = { Text("Category") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = {
+                        val cal = Calendar.getInstance().apply { time = selectedDate }
+                        DatePickerDialog(
+                            context,
+                            { _, y, m, d ->
+                                val selected = Calendar.getInstance().apply { set(y, m, d) }
+                                selectedDate = selected.time
+                            },
+                            cal.get(Calendar.YEAR),
+                            cal.get(Calendar.MONTH),
+                            cal.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Date: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate)}")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text("Status:", fontWeight = FontWeight.Bold)
+                Status.values().forEach { status ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(selected = selectedStatus == status, onClick = { selectedStatus = status })
+                        Text(status.name)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = employeeExpanded,
+                    onExpandedChange = { employeeExpanded = !employeeExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedEmployee?.let { "${it.firstName} ${it.lastName}" } ?: "Choose Employee",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Employee") },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = employeeExpanded) }
+                    )
+                    ExposedDropdownMenu(expanded = employeeExpanded, onDismissRequest = { employeeExpanded = false }) {
+                        employees.forEach { emp ->
+                            DropdownMenuItem(
+                                text = { Text("${emp.firstName} ${emp.lastName}") },
+                                onClick = { selectedEmployee = emp; employeeExpanded = false }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = accountExpanded,
+                    onExpandedChange = { accountExpanded = !accountExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedAccount?.let { "ID: ${it.idAccount}" } ?: "Choose Account",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Account") },
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = accountExpanded) }
+                    )
+                    ExposedDropdownMenu(expanded = accountExpanded, onDismissRequest = { accountExpanded = false }) {
+                        accounts.forEach { acc ->
+                            DropdownMenuItem(
+                                text = { Text("ID: ${acc.idAccount}") },
+                                onClick = { selectedAccount = acc; accountExpanded = false }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                if (selectedEmployee != null && selectedAccount != null) {
+                    val dto = TransactionCreateDTO(
+                        reporter = selectedEmployee!!.idEmployee,
+                        account = selectedAccount!!.idAccount,
+                        description = description,
+                        date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(selectedDate),
+                        amount = amount.toDoubleOrNull() ?: 0.0,
+                        category = category,
+                        status = selectedStatus
+                    )
+                    onConfirm(dto)
+                } else {
+                    Toast.makeText(context, "You must choose Employee and Account", Toast.LENGTH_SHORT).show()
+                }
+            }) { Text("Confirm") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
 }
