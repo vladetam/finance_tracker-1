@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"employee_id", "type"}
+        )
+)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,7 +36,7 @@ public class Account {
 
 
     @ManyToOne
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
 }

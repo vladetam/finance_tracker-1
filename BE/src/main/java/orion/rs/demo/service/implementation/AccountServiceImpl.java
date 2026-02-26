@@ -141,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
 
             } catch (Exception e) {
                 // Svaki neuspešan zapis se beleži
-                failedRecords.add(new FailedRecord(i, e.getMessage()));
+                failedRecords.add(new FailedRecord(i, "Zaposleni vec ima taj tip racuna!"));
             }
         }
 
