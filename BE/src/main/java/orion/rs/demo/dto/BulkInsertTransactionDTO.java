@@ -26,7 +26,7 @@ public class BulkInsertTransactionDTO {
     private String description;
 
     @NotNull(message = "Date is mandatory")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd"+" "+ "HH:mm:ss")
     private Date date;
 
     @NotNull(message = "Amount is mandatory")

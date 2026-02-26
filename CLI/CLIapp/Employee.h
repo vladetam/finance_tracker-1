@@ -25,14 +25,15 @@ public:
     // Convert to JSON
     json to_json() const {
         return json{
-            {"id", id},
-            {"firstname", firstname},
-            {"lastname", lastname},
+          
+            {"first_name", firstname},
+            {"last_name", lastname},
             {"email", email}
         };
     }
 
     void setId(long newId) { id = newId; }
+    long getId() { return id; }
 };
 
 bool createEmployee();

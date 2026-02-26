@@ -1,10 +1,12 @@
 package orion.rs.demo.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
@@ -15,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.service.TransactionService;
 import orion.rs.demo.transaction_specification.TransactionSpecification;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 import  java.util.Map;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +42,32 @@ public class TransactionController {
         this.accountRepository = accountRepository;
         this.transactionService = transactionService;
     }
+
+    @GetMapping(value = "/getAllForCSV", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllTransactionCSV(){
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getAllTransaction());
+    }
+
+    @GetMapping(value = "/exportCSVtransactions")
+    public void exportToCSV(HttpServletResponse servletResponse) throws IOException{
+        servletResponse.setContentType("text/csv");
+        servletResponse.setHeader("Content-Disposition", "attachment; filename=transakcije.csv");
+        List<Transaction> transactionList = transactionService.getAllTransaction();
+        PrintWriter printWriter = servletResponse.getWriter();
+
+        printWriter.println("Amount, status, description and date od transactions");
+
+        for(Transaction t : transactionList){
+            printWriter.println(t.getAmount() + "\n" + t.getStatus() + "\n"+ t.getDescription() + "\n" + t.getDate()
+            );
+
+            printWriter.println("\n\n\n");
+        }
+
+        printWriter.flush();
+        printWriter.close();
+    }
+
 
     @PostMapping
     public ResponseEntity<?> createTransaction(@RequestBody Transaction transaction) {
