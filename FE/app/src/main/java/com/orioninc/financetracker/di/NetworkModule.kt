@@ -1,5 +1,6 @@
 package com.orioninc.financetracker.di
 
+import com.orioninc.financetracker.repository.AccountApi
 import com.orioninc.financetracker.repository.EmployeeApi
 import com.orioninc.financetracker.repository.TransactionApi
 import com.orioninc.financetracker.repository.TransactionRepository
@@ -32,4 +33,9 @@ object NetworkModule {
     @Singleton
     fun provideEmployeeApi(retrofit: Retrofit): EmployeeApi =
         retrofit.create(EmployeeApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAccountApi(retrofit: Retrofit): AccountApi=
+        retrofit.create(AccountApi::class.java)
 }

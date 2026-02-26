@@ -1,5 +1,7 @@
 package com.orioninc.financetracker.di
 
+import com.orioninc.financetracker.repository.AccountRepository
+import com.orioninc.financetracker.repository.AccountRepositoryImplementation
 import com.orioninc.financetracker.repository.EmployeeRepository
 import com.orioninc.financetracker.repository.EmployeeRepositoryImplementation
 import com.orioninc.financetracker.repository.TransactionRepository
@@ -25,4 +27,10 @@ abstract class RepositoryModule {
     abstract fun bindEmployeeRepository(
         implementation: EmployeeRepositoryImplementation
     ) : EmployeeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAccountRepository(
+        implementation: AccountRepositoryImplementation
+    ) : AccountRepository
 }

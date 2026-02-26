@@ -1,6 +1,7 @@
 package com.orioninc.financetracker.view
 
 import android.app.DatePickerDialog
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.orioninc.financetracker.model.Account
 import com.orioninc.financetracker.model.Employee
 import com.orioninc.financetracker.model.Status
 import com.orioninc.financetracker.model.Transaction
@@ -29,14 +31,20 @@ import java.util.*
 @Composable
 fun TransactionScreenRoute(
     transactionViewModel: TransactionViewModel = hiltViewModel(),
-    employeeViewModel: EmployeeViewModel = hiltViewModel()
+    employeeViewModel: EmployeeViewModel = hiltViewModel(),
+    accountViewModel:AccountViewModel = hiltViewModel()
 ) {
     val transactions by transactionViewModel.filteredTransactions.observeAsState(emptyList())
     val loading by transactionViewModel.loading.observeAsState(false)
     val error by transactionViewModel.error.observeAsState()
     val employees by employeeViewModel.employees.observeAsState(emptyList())
-    val accounts = listOf("Account 1", "Account 2") // primer, može se učitati iz beka
+    val accounts by accountViewModel.accounts.observeAsState(emptyList())
 
+    LaunchedEffect(Unit) {
+        accountViewModel.loadAccounts()
+        transactionViewModel.loadTransactions()
+        employeeViewModel.loadEmployees()
+    }
     TransactionScreen(
         transactions = transactions,
         loading = loading,
@@ -58,7 +66,7 @@ fun TransactionScreen(
     loading: Boolean,
     error: String?,
     employees: List<Employee>,
-    accounts: List<String>,
+    accounts: List<Account>,
     onReset: () -> Unit,
     onFilterByEmployee: (Long) -> Unit,
     onFilterByAccount: (Long) -> Unit,
@@ -68,12 +76,12 @@ fun TransactionScreen(
     val context = LocalContext.current
     val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     var menuExpanded by remember { mutableStateOf(false) }
-    var accountMenuExpanded by remember { mutableStateOf(false) }
-    var employeeMenuExpanded by remember { mutableStateOf(false) }
-    var statusMenuExpanded by remember { mutableStateOf(false) }
 
     var showActionDialog by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
+    var showEmployeeDialog by remember { mutableStateOf(false) }
+    var showAccountDialog by remember { mutableStateOf(false) }
+    var showStatusDialog by remember { mutableStateOf(false) }
 
     val softDarkGray = Color(0xFF373737)
     val concreteLightGray = Color(0xFFE0E0E0)
@@ -110,50 +118,20 @@ fun TransactionScreen(
                         })
                         DropdownMenuItem(text = { Text("Filter by Status") }, onClick = {
                             menuExpanded = false
-                            statusMenuExpanded = true
+                            showStatusDialog = true
                         })
-                        DropdownMenuItem(text = { Text("Filter by Account") }, onClick = { accountMenuExpanded = true })
-                        DropdownMenuItem(text = { Text("Filter by Employee") }, onClick = { employeeMenuExpanded = true })
+
+                        DropdownMenuItem(text = { Text("Filter by Account") }, onClick = {
+                            menuExpanded = false
+                            showAccountDialog = true
+                        })
+
+                        DropdownMenuItem(text = { Text("Filter by Employee") }, onClick = {
+                            menuExpanded = false
+                            showEmployeeDialog = true
+                        })
                     }
 
-                    // Dropdown za account
-                    DropdownMenu(
-                        expanded = accountMenuExpanded,
-                        onDismissRequest = { accountMenuExpanded = false }
-                    ) {
-                        accounts.forEach { account ->
-                            DropdownMenuItem(text = { Text(account) }, onClick = {
-                                accountMenuExpanded = false
-                                onFilterByAccount(account.toLong()) // prilagodi tip
-                            })
-                        }
-                    }
-
-                    // Dropdown za employee
-                    DropdownMenu(
-                        expanded = employeeMenuExpanded,
-                        onDismissRequest = { employeeMenuExpanded = false }
-                    ) {
-                        employees.forEach { employee ->
-                            DropdownMenuItem(text = { Text("${employee.firstName} ${employee.lastName}") }, onClick = {
-                                employeeMenuExpanded = false
-                                onFilterByEmployee(employee.idEmployee)
-                            })
-                        }
-                    }
-
-                    // Dropdown za status
-                    DropdownMenu(
-                        expanded = statusMenuExpanded,
-                        onDismissRequest = { statusMenuExpanded = false }
-                    ) {
-                        Status.values().forEach { status ->
-                            DropdownMenuItem(text = { Text(status.name) }, onClick = {
-                                statusMenuExpanded = false
-                                onFilterByStatus(status)
-                            })
-                        }
-                    }
                 }
             )
         },
@@ -192,7 +170,6 @@ fun TransactionScreen(
         }
     }
 
-    // ACTION DIALOG: Create / Delete / Update
     if (showActionDialog) {
         AlertDialog(
             onDismissRequest = { showActionDialog = false },
@@ -219,7 +196,6 @@ fun TransactionScreen(
         )
     }
 
-    // CREATE DIALOG
     if (showCreateDialog) {
         var description by remember { mutableStateOf("") }
         var amount by remember { mutableStateOf("") }
@@ -302,6 +278,84 @@ fun TransactionScreen(
                 }) { Text("Create") }
             },
             dismissButton = { TextButton(onClick = { showCreateDialog = false }) { Text("Cancel") } }
+        )
+    }
+    if (showEmployeeDialog) {
+        AlertDialog(
+            onDismissRequest = { showEmployeeDialog = false },
+            title = { Text("Select Employee") },
+            text = {
+                Column {
+                    employees.forEach { employee ->
+                        TextButton(
+                            onClick = {
+                                onFilterByEmployee(employee.idEmployee)
+                                showEmployeeDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("${employee.firstName} ${employee.lastName}")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showEmployeeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    if (showAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showAccountDialog = false },
+            title = { Text("Select Account") },
+            text = {
+                Column {
+                    accounts.forEach { account ->
+                        TextButton(
+                            onClick = {
+                                onFilterByAccount(account.idAccount)
+                                showAccountDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("ID: ${account.idAccount}")
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAccountDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    if (showStatusDialog) {
+        AlertDialog(
+            onDismissRequest = { showStatusDialog = false },
+            title = { Text("Select Status") },
+            text = {
+                Column {
+                    Status.values().forEach { status ->
+                        TextButton(
+                            onClick = {
+                                onFilterByStatus(status)
+                                showStatusDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(status.name)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showStatusDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }
