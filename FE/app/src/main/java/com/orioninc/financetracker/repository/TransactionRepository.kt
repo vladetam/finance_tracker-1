@@ -12,7 +12,7 @@ interface TransactionRepository {
     suspend fun createTransaction(transaction: TransactionCreateDTO)
 
 
-    suspend fun updateTransaction(id: Long, transaction: Transaction)
+    suspend fun updateTransaction(id: Long, dto: TransactionCreateDTO)
 
 
     suspend fun deleteTransaction(id: Long)

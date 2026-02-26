@@ -88,4 +88,17 @@ class TransactionViewModel @Inject constructor(
                 formatter.format(it.date) == formatter.format(selectedDate)
             }
     }
+    fun updateTransaction(id: Long, dto: TransactionCreateDTO) {
+        viewModelScope.launch {
+            try {
+                loading.postValue(true)
+                repository.updateTransaction(id, dto)
+                loadTransactions()
+            } catch (e: Exception) {
+                error.postValue(e.message)
+            } finally {
+                loading.postValue(false)
+            }
+        }
+    }
 }

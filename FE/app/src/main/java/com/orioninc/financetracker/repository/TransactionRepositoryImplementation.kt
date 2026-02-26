@@ -29,11 +29,8 @@ class TransactionRepositoryImplementation @Inject constructor(
         }
     }
 
-    override suspend fun updateTransaction(id: Long, transaction: Transaction) {
-        val response = api.updateTransaction(id, transaction)
-        if (!response.isSuccessful) {
-            throw HttpException(response)
-        }
+    override suspend fun updateTransaction(id: Long, dto: TransactionCreateDTO) {
+        api.updateTransaction(id, dto)
     }
 
     override suspend fun deleteTransaction(id: Long) {
