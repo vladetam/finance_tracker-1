@@ -204,6 +204,22 @@ public class TransactionService {
                 continue;
             }
 
+            boolean exists = transactionRepository.existsByReporterAndAccountAndDate(
+                    reporter,
+                    account,
+                    dto.getDate()
+            );
+
+            if (exists) {
+                Map<String, Object> failed = new HashMap<>();
+                failed.put("dto", dto);
+                failed.put("error", "Vec postoji transakcija sa identicnim employee-om, account-om i date-om");
+                failedRecords.add(failed);
+                continue;
+            }
+
+
+
             try {
                 // 4. Kreiranje Transaction entity
                 Transaction transaction = new Transaction();

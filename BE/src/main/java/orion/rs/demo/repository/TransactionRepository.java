@@ -43,4 +43,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             "GROUP BY t.reporter.id, t.account.id, DATE(t.date) " +
             "HAVING COUNT(t) > 1")
     List<Object[]> findDuplicateTransactions();
+    boolean existsByReporterAndAccountAndDate(Employee reporter, Account account, Date date);
+
 }
