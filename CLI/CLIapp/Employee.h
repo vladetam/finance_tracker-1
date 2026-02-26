@@ -4,6 +4,10 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include "http.h"
 
 using json = nlohmann::json;
 
@@ -37,3 +41,5 @@ public:
 };
 
 bool createEmployee();
+
+void syncEmployees();

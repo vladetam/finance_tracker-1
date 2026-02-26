@@ -10,12 +10,12 @@ bool createTransaction()
     try {
         json j = json::parse(response);
 
-        // Check if "content" exists and is an array
-        if (j.contains("content") && j["content"].is_array()) {
-            jEmployees = j["content"];
+        // Check if response itself is an array
+        if (j.is_array()) {
+            jEmployees = j;
         }
         else {
-            std::cout << "Invalid API response format.\n";
+            std::cout << "Invalid API response format. Expected JSON array.\n";
             return false;
         }
     }
@@ -40,8 +40,8 @@ bool createTransaction()
         for (size_t i = 0; i < jEmployees.size(); ++i) {
             const auto& e = jEmployees[i];
             std::cout << i + 1 << ". [" << e["id"] << "] "
-                << e["firstName"].get<std::string>() << " "
-                << e["lastName"].get<std::string>()
+                << e["firstname"].get<std::string>() << " "
+                << e["lastname"].get<std::string>()
                 << " (" << e["email"].get<std::string>() << ")\n";
         }
 
@@ -57,8 +57,8 @@ bool createTransaction()
 
                 emp = Employee(
                     selected["id"].get<long>(),
-                    selected["firstName"].get<std::string>(),
-                    selected["lastName"].get<std::string>(),
+                    selected["firstname"].get<std::string>(),
+                    selected["lastname"].get<std::string>(),
                     selected["email"].get<std::string>()
                 );
 
@@ -290,7 +290,7 @@ std::string timePointToString(std::chrono::system_clock::time_point tp)
     gmtime_s(&tm, &t);
 
     std::stringstream ss;
-    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    ss << std::put_time(&tm, "%Y-%m-%dT%H:%M:%S");
     return ss.str();
 }
 std::chrono::system_clock::time_point stringToTimePoint(const std::string& str)
@@ -306,8 +306,8 @@ std::chrono::system_clock::time_point stringToTimePoint(const std::string& str)
 json Transaction::to_json() const {
     return {
         
-        {"reporter", reporter},
-        {"account", account},
+        {"reporterId", reporter},
+        {"accountId", account},
         {"description", description},
        
         {"date", timePointToString(now)},

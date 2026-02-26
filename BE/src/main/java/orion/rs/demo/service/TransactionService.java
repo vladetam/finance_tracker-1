@@ -1,17 +1,23 @@
 package orion.rs.demo.service;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import orion.rs.demo.domain.*;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
+import orion.rs.demo.dto.CreateTransactionDTO;
 import orion.rs.demo.dto.TransactionDTO;
 import orion.rs.demo.dto.UpdateTransactionDTO;
+import orion.rs.demo.exceptionHandling.AccountNotFoundException;
+import orion.rs.demo.exceptionHandling.EmployeeNotFoundException;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.TransactionRepository;
 import java.math.BigDecimal;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -33,6 +39,9 @@ public class TransactionService {
     public List<Transaction> getAllTransaction(){
         return transactionRepository.findAll();
     }
+
+
+
 
     public Transaction updateTrans(Long id, Transaction transaction) throws Exception {
 
@@ -238,5 +247,44 @@ public class TransactionService {
         return result;
     }
 
+
+    public Transaction createTransaction(@Valid CreateTransactionDTO dto) {
+
+        Employee reporter = employeeRepository.findById(dto.getReporterId())
+                .orElseThrow(() -> new EmployeeNotFoundException(dto.getReporterId()));
+
+
+        Account account = accountRepository.findById(dto.getAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(dto.getAccountId()));
+
+
+        Date parsedDate;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            sdf.setLenient(false); // Vazno
+            parsedDate = sdf.parse(dto.getDate());
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Datum mora biti u formatu: yyyy-MM-dd HH:mm:ss");
+        }
+
+        Status status;
+        try {
+            status = Status.valueOf(dto.getStatus());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Losa vrednost statusa");
+        }
+
+
+        Transaction transaction = new Transaction();
+        transaction.setReporter(reporter);
+        transaction.setAccount(account);
+        transaction.setDescription(dto.getDescription());
+        transaction.setDate(parsedDate);
+        transaction.setAmount(dto.getAmount());
+        transaction.setCategory(dto.getCategory());
+        transaction.setStatus(status);
+
+        return transactionRepository.save(transaction);
+    }
 
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -25,8 +26,8 @@ public class BulkInsertTransactionDTO {
     @NotBlank(message = "Description is mandatory")
     private String description;
 
-    @NotNull(message = "Date is mandatory")
-    @JsonFormat(pattern = "yyyy-MM-dd"+" "+ "HH:mm:ss")
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "UTC")
     private Date date;
 
     @NotNull(message = "Amount is mandatory")

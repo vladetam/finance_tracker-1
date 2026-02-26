@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
+import orion.rs.demo.dto.CreateTransactionDTO;
 import orion.rs.demo.repository.TransactionRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
@@ -74,7 +75,7 @@ public class TransactionController {
     }
 
 
-    @PostMapping
+    @PostMapping(value="/v1")
     public ResponseEntity<?> createTransaction(@RequestBody Transaction transaction) {
 
 
@@ -180,4 +181,13 @@ public class TransactionController {
         Map<String, Object> result = transactionService.bulkInsertTransactions(dtos);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping
+    public ResponseEntity<Transaction> create(
+            @Valid @RequestBody CreateTransactionDTO dto) {
+
+        Transaction saved = transactionService.createTransaction(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
 }

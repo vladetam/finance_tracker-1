@@ -70,3 +70,35 @@ bool createEmployee()
 	std::cout << "=====================================" << std::endl;
 	return false;
 }
+
+void syncEmployees() {
+	std::string response = httpGET("http://localhost:8080/api/employees/export");
+
+	// Get current date and time for filename
+	std::time_t t = std::time(nullptr);
+	std::tm tm;
+#ifdef _WIN32
+	localtime_s(&tm, &t);
+#else
+	localtime_r(&t, &tm);
+#endif
+
+	std::ostringstream oss;
+	oss << "employees_"
+		<< std::put_time(&tm, "%Y-%m-%d_%H-%M-%S")
+		<< ".csv";
+	std::string filename = oss.str();
+
+	// Open file for writing
+	std::ofstream outFile(filename);
+	if (!outFile.is_open()) {
+		std::cout << "Failed to open file: " << filename << "\n";
+		return;
+	}
+
+	// Write CSV data
+	outFile << response;
+	outFile.close();
+
+	std::cout << "Employees exported successfully to " << filename << "\n";
+}

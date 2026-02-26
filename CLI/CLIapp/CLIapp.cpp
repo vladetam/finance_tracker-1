@@ -56,7 +56,7 @@ void main() {
 			cout << 5;
 			break;
 		case 6:
-			cout << 6;
+			syncEmployees();
 			break;
 		case 7:
 			cout << "Exiting";

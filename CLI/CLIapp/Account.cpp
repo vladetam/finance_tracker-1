@@ -73,18 +73,18 @@ bool Account::createAccount() {
     }
 
     json jEmployees = json::array();
-
+ 
     std::string response = httpGET("http://localhost:8080/api/employees");
-
+ 
     try {
         json j = json::parse(response);
-
-        // Check if "content" exists and is an array
-        if (j.contains("content") && j["content"].is_array()) {
-            jEmployees = j["content"];
+ 
+        // Check if response itself is an array
+        if (j.is_array()) {
+            jEmployees = j;
         }
         else {
-            std::cout << "Invalid API response format.\n";
+            std::cout << "Invalid API response format. Expected JSON array.\n";
             return false;
         }
     }
@@ -92,48 +92,48 @@ bool Account::createAccount() {
         std::cout << "Invalid JSON: " << e.what() << "\n";
         return false;
     }
-
+ 
     // If no employees returned
     if (jEmployees.empty()) {
         std::cout << "No employees found. Please create employees first.\n";
         return false;
     }
-
+ 
     size_t choice;
     std::string input;
     Employee emp(0, "", "", "");
-
+ 
     while (true) {
         std::cout << "\nSelect an employee to assign:\n";
-
+ 
         for (size_t i = 0; i < jEmployees.size(); ++i) {
             const auto& e = jEmployees[i];
             std::cout << i + 1 << ". [" << e["id"] << "] "
-                << e["firstName"].get<std::string>() << " "
-                << e["lastName"].get<std::string>()
-                << " (" << e["email"].get<std::string>() << ")\n";
+    << e["firstname"].get<std::string>() << " "
+    << e["lastname"].get<std::string>()
+    << " (" << e["email"].get<std::string>() << ")\n";
         }
-
+ 
         std::cout << "Enter number: ";
         std::cin >> input;
         std::cin.ignore();
-
+ 
         try {
             choice = std::stoi(input);
-
+ 
             if (choice >= 1 && choice <= jEmployees.size()) {
                 auto selected = jEmployees[choice - 1];
-
+ 
                 emp = Employee(
                     selected["id"].get<long>(),
-                    selected["firstName"].get<std::string>(),
-                    selected["lastName"].get<std::string>(),
+                    selected["firstname"].get<std::string>(),
+                    selected["lastname"].get<std::string>(),
                     selected["email"].get<std::string>()
                 );
-
+ 
                 break;
             }
-
+ 
             std::cout << "Invalid employee selection. Try again.\n";
         }
         catch (std::invalid_argument&) {
@@ -143,8 +143,7 @@ bool Account::createAccount() {
             std::cout << "Number out of range\n";
         }
     }
-
-    long newId = 1;
+    
     int version = 1;
     json accounts = json::array();
     std::ifstream inFile("accounts.json");
@@ -152,20 +151,18 @@ bool Account::createAccount() {
         try { inFile >> accounts; }
         catch (...) { accounts = json::array(); }
         inFile.close();
-        if (!accounts.empty())
-            newId = accounts.back()["id"].get<long>() + 1;
+       
     }
 
-    Account account(newId, accType, balance, currency, version, emp.getId());
+    Account account(0, accType, balance, currency, version, emp.getId());
     accounts.push_back(account.to_json());
 
     std::ofstream outFile("accounts.json");
     outFile << accounts.dump(4);
     outFile.close();
 
-    std::cout << "\nAccount saved successfully! ID: " << newId
-        << ", Assigned to employee: " << emp.to_json()["firstname"] << " "
-        << emp.to_json()["lastname"] << "\n";
+    std::cout << "\nAccount saved successfully! ID: "
+        << ", Assigned to employee: "<< "\n";
 
     return true;
 }
