@@ -8,6 +8,7 @@ import orion.rs.demo.dto.AccountDTO;
 import orion.rs.demo.dto.BulkInsertAccDTO;
 import orion.rs.demo.dto.FailedRecord;
 import orion.rs.demo.exceptionHandling.AccountNotFoundException;
+import orion.rs.demo.exceptionHandling.EmployeeNotFoundException;
 import orion.rs.demo.repository.AccountRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.service.AccountService;
@@ -41,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountDTO createAccount(AccountCreateDTO dto) {
         // Validacija zaposlenog
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen."));
+                .orElseThrow(() -> new EmployeeNotFoundException(dto.getEmployeeId()));
         if(!dto.getCurrency().matches("[a-zA-Z]+")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
         }
@@ -68,8 +69,7 @@ public class AccountServiceImpl implements AccountService {
 
         // Validacija zaposlenog
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Zaposleni nije pronadjen"));
+                .orElseThrow(() -> new EmployeeNotFoundException(dto.getEmployeeId()));
 
         if(!dto.getCurrency().matches("[a-zA-Z]+")){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuta mora sadrzati samo slova");
@@ -101,7 +101,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
-    @Transactional
     public BulkInsertAccDTO bulkInsert(List<AccountCreateDTO> dtos) {
         List<Long> savedIds = new ArrayList<>();
         List<FailedRecord> failedRecords = new ArrayList<>();

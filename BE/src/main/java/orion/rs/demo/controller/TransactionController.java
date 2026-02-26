@@ -1,11 +1,13 @@
 package orion.rs.demo.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
+import orion.rs.demo.dto.BulkInsertTransactionDTO;
 import orion.rs.demo.repository.TransactionRepository;
 import orion.rs.demo.repository.EmployeeRepository;
 import orion.rs.demo.repository.AccountRepository;
@@ -13,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.service.TransactionService;
 import orion.rs.demo.transaction_specification.TransactionSpecification;
-
+import  java.util.Map;
 import java.util.Date;
 import java.util.List;
 
@@ -126,6 +128,7 @@ public class TransactionController {
             return ResponseEntity.noContent().build();
 
         } catch (Exception e) {
+
             //ako transakcija ne postoji
             if (e.getMessage().contains("not found")) {
                 return ResponseEntity.status(404).body(e.getMessage());
@@ -133,5 +136,12 @@ public class TransactionController {
             //sve ostale greške
             return ResponseEntity.status(500).body(e.getMessage());
         }
+    }
+    @PostMapping("/bulk")
+    public ResponseEntity<?> bulkInsert(
+            @RequestBody List<@Valid BulkInsertTransactionDTO> dtos) {
+
+        Map<String, Object> result = transactionService.bulkInsertTransactions(dtos);
+        return ResponseEntity.ok(result);
     }
 }

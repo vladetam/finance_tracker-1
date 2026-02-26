@@ -257,7 +257,7 @@ std::string timePointToString(std::chrono::system_clock::time_point tp)
     gmtime_s(&tm, &t);
 
     std::stringstream ss;
-    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%SZ");
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
     return ss.str();
 }
 std::chrono::system_clock::time_point stringToTimePoint(const std::string& str)
@@ -265,7 +265,7 @@ std::chrono::system_clock::time_point stringToTimePoint(const std::string& str)
     std::istringstream iss(str);
     std::chrono::system_clock::time_point tp;
 
-    iss >> std::chrono::parse("%Y-%m-%d %H:%M:%SZ", tp);//"%Y-%m-%dT%H:%M:%SZ"
+    iss >> std::chrono::parse("%Y-%m-%d %H:%M:%S", tp);//"%Y-%m-%dT%H:%M:%SZ"
 
     return tp;
 }
