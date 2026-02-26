@@ -1,5 +1,6 @@
 package com.orioninc.financetracker.view
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.Toast
@@ -27,6 +28,7 @@ import com.orioninc.financetracker.model.Transaction
 import com.orioninc.financetracker.model.TransactionCreateDTO
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +62,9 @@ fun TransactionScreenRoute(
         onFilterByDate = { transactionViewModel.filterByDate(it) },
         onCreateTransaction = { dto: TransactionCreateDTO ->
             transactionViewModel.createTransaction(dto)
+        },
+        onUpdateTransaction = { id, dto ->
+            transactionViewModel.updateTransaction(id, dto)
         }
     )
 }
@@ -77,11 +82,11 @@ fun TransactionScreen(
     onFilterByAccount: (Long) -> Unit,
     onFilterByStatus: (Status) -> Unit,
     onFilterByDate: (Date) -> Unit,
-    onCreateTransaction: (TransactionCreateDTO) -> Unit
+    onCreateTransaction: (TransactionCreateDTO) -> Unit,
+    onUpdateTransaction: (Long, TransactionCreateDTO) -> Unit
 )  {
     val context = LocalContext.current
     val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-    val dateFormatter2 = SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.getDefault())
 
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -90,6 +95,8 @@ fun TransactionScreen(
     var showEmployeeDialog by remember { mutableStateOf(false) }
     var showAccountDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
+    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
 
     val softDarkGray = Color(0xFF373737)
     val concreteLightGray = Color(0xFFE0E0E0)
@@ -161,7 +168,15 @@ fun TransactionScreen(
 
             LazyColumn {
                 items(transactions) { transaction ->
-                    TransactionItem(transaction, dateFormatter, concreteLightGray)
+                    TransactionItem(
+                        transaction = transaction,
+                        formatter = dateFormatter,
+                        cardColor = concreteLightGray,
+                        onEditClick = {
+                            selectedTransaction = transaction
+                            showUpdateDialog = true
+                        }
+                    )
                 }
             }
 
@@ -175,7 +190,6 @@ fun TransactionScreen(
         }
     }
 
-    // ACTION DIALOG
     if (showActionDialog) {
         AlertDialog(
             onDismissRequest = { showActionDialog = false },
@@ -189,19 +203,19 @@ fun TransactionScreen(
 
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false }
+                        onClick = { showActionDialog = false; }
                     ) { Text("Delete Transaction") }
 
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { showActionDialog = false }
+                        onClick = { showActionDialog = false; showUpdateDialog = true}
                     ) { Text("Update Transaction") }
                 }
             },
             confirmButton = { TextButton(onClick = { showActionDialog = false }) { Text("Cancel") } }
         )
     }
-// CREATE TRANSACTION DIALOG
+
     if (showCreateDialog) {
         var description by remember { mutableStateOf("") }
         var amount by remember { mutableStateOf("") }
@@ -245,7 +259,6 @@ fun TransactionScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Status Radio Buttons
                     Column {
                         Status.values().forEach { status ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -257,7 +270,6 @@ fun TransactionScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Employee Dropdown
                     ExposedDropdownMenuBox(
                         expanded = expandedEmployee,
                         onExpandedChange = { expandedEmployee = !expandedEmployee }
@@ -289,7 +301,6 @@ fun TransactionScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Account Dropdown
                     ExposedDropdownMenuBox(
                         expanded = expandedAccount,
                         onExpandedChange = { expandedAccount = !expandedAccount }
@@ -344,7 +355,185 @@ fun TransactionScreen(
         )
     }
 
-    // EMPLOYEE FILTER DIALOG
+    if (showUpdateDialog && selectedTransaction != null) {
+
+
+        var description by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.description)
+        }
+
+        var amount by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.amount.toString())
+        }
+
+        var category by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.category)
+        }
+
+        var selectedStatus by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.status)
+        }
+
+        var selectedDate by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.date)
+        }
+
+        var expandedEmployee by remember { mutableStateOf(false) }
+
+        var selectedEmployee by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.reporter)
+        }
+
+        var expandedAccount by remember { mutableStateOf(false) }
+
+        var selectedAccount by remember(selectedTransaction) {
+            mutableStateOf(selectedTransaction!!.account)
+        }
+//        var description by remember { mutableStateOf(selectedTransaction!!.description) }
+//        var amount by remember { mutableStateOf(selectedTransaction!!.amount.toString()) }
+//        var category by remember { mutableStateOf(selectedTransaction!!.category) }
+//        var selectedStatus by remember { mutableStateOf(selectedTransaction!!.status) }
+//        var selectedDate by remember { mutableStateOf(selectedTransaction!!.date) }
+//
+//        var expandedEmployee by remember { mutableStateOf(false) }
+//        var selectedEmployee by remember { mutableStateOf(selectedTransaction!!.reporter) }
+//
+//        var expandedAccount by remember { mutableStateOf(false) }
+//        var selectedAccount by remember { mutableStateOf(selectedTransaction!!.account) }
+
+        AlertDialog(
+            onDismissRequest = { showUpdateDialog = false },
+            title = { Text("Update Transaction") },
+            text = {
+                Column {
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Description") }
+                    )
+
+                    OutlinedTextField(
+                        value = amount,
+                        onValueChange = { amount = it },
+                        label = { Text("Amount") }
+                    )
+
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text("Category") }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Column {
+                        Status.values().forEach { status ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(
+                                    selected = selectedStatus == status,
+                                    onClick = { selectedStatus = status }
+                                )
+                                Text(status.name)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    ExposedDropdownMenuBox(
+                        expanded = expandedEmployee,
+                        onExpandedChange = { expandedEmployee = !expandedEmployee }
+                    ) {
+                        OutlinedTextField(
+                            value = "${selectedEmployee.firstName} ${selectedEmployee.lastName}",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Select Employee") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEmployee)
+                            },
+                            modifier = Modifier.menuAnchor()
+                        )
+
+                        DropdownMenu(
+                            expanded = expandedEmployee,
+                            onDismissRequest = { expandedEmployee = false }
+                        ) {
+                            employees.forEach { employee ->
+                                DropdownMenuItem(
+                                    text = { Text("${employee.firstName} ${employee.lastName}") },
+                                    onClick = {
+                                        selectedEmployee = employee
+                                        expandedEmployee = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    ExposedDropdownMenuBox(
+                        expanded = expandedAccount,
+                        onExpandedChange = { expandedAccount = !expandedAccount }
+                    ) {
+                        OutlinedTextField(
+                            value = "ID: ${selectedAccount.idAccount}",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Select Account") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedAccount)
+                            },
+                            modifier = Modifier.menuAnchor()
+                        )
+
+                        DropdownMenu(
+                            expanded = expandedAccount,
+                            onDismissRequest = { expandedAccount = false }
+                        ) {
+                            accounts.forEach { account ->
+                                DropdownMenuItem(
+                                    text = { Text("ID: ${account.idAccount}") },
+                                    onClick = {
+                                        selectedAccount = account
+                                        expandedAccount = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (selectedEmployee != null && selectedAccount != null) {
+
+                        val dto = TransactionCreateDTO(
+                            reporter = selectedEmployee.idEmployee,
+                            account = selectedAccount.idAccount,
+                            description = description,
+                            date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(selectedDate),
+                            amount = amount.toDoubleOrNull() ?: 0.0,
+                            category = category,
+                            status = selectedStatus
+                        )
+                        Log.d("DEBUG",""+dto.reporter+dto.account+dto.description+dto.date+dto.amount+dto.category+dto.status)
+
+                        onUpdateTransaction(selectedTransaction!!.idTransaction, dto)
+                        showUpdateDialog = false
+                    }
+                }) {
+                    Text("Update")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUpdateDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     if (showEmployeeDialog) {
         AlertDialog(
             onDismissRequest = { showEmployeeDialog = false },
@@ -365,7 +554,6 @@ fun TransactionScreen(
         )
     }
 
-    // ACCOUNT FILTER DIALOG
     if (showAccountDialog) {
         AlertDialog(
             onDismissRequest = { showAccountDialog = false },
@@ -386,7 +574,6 @@ fun TransactionScreen(
         )
     }
 
-    // STATUS FILTER DIALOG
     if (showStatusDialog) {
         AlertDialog(
             onDismissRequest = { showStatusDialog = false },
@@ -409,13 +596,31 @@ fun TransactionScreen(
 }
 
 @Composable
-fun TransactionItem(transaction: Transaction, formatter: SimpleDateFormat, cardColor: Color) {
+fun TransactionItem(
+    transaction: Transaction,
+    formatter: SimpleDateFormat,
+    cardColor: Color,
+    onEditClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(transaction.description, fontWeight = FontWeight.Bold)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(transaction.description, fontWeight = FontWeight.Bold)
+
+                IconButton(onClick = { onEditClick() }) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                }
+            }
+
             Text("By: ${transaction.reporter.firstName} ${transaction.reporter.lastName}")
             Text("Amount: ${transaction.amount} RSD", color = Color(0xFF1B5E20))
             Text("Status: ${transaction.status}")

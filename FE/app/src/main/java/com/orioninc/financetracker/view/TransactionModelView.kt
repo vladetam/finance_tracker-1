@@ -1,5 +1,6 @@
 package com.orioninc.financetracker.view
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.orioninc.financetracker.model.Account
 import com.orioninc.financetracker.model.Employee
@@ -87,5 +88,20 @@ class TransactionViewModel @Inject constructor(
             _allTransactions.value?.filter {
                 formatter.format(it.date) == formatter.format(selectedDate)
             }
+    }
+    fun updateTransaction(id: Long, dto: TransactionCreateDTO) {
+        viewModelScope.launch {
+            try {
+                _loading.value = true
+                repository.updateTransaction(id, dto)
+                loadTransactions()
+                _error.value = null
+            } catch (e: Exception) {
+                Log.e("API_ERROR", "Update failed", e)
+                _error.value = "Update failed: ${e.message}"
+            } finally {
+                _loading.value = false
+            }
+        }
     }
 }
