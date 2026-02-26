@@ -104,4 +104,19 @@ class TransactionViewModel @Inject constructor(
             }
         }
     }
+    fun deleteTransaction(id: Long) {
+        viewModelScope.launch {
+            try {
+                _loading.value = true
+                repository.deleteTransaction(id)
+                loadTransactions() 
+                _error.value = null
+            } catch (e: Exception) {
+                Log.e("API_ERROR", "Delete failed", e)
+                _error.value = "Delete failed: ${e.message}"
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
 }
