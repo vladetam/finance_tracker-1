@@ -5,12 +5,13 @@
 #include "Status.h"
 #include <iomanip>
 #include <sstream>
+#include "http.h"
 class Transaction
 {
 private:
 	long id;
-	Employee reporter;
-	Account	account;
+	long reporter;
+	long	account;
 	std::string description;
 	int version;
 	std::chrono::system_clock::time_point now;
@@ -19,8 +20,8 @@ private:
 	Status status;
 public:
     Transaction(long id,
-        const Employee& reporter,
-        const Account& account,
+        long reporter,
+        long account,
         const std::string& description,
         int version,
         std::chrono::system_clock::time_point timestamp,
@@ -46,3 +47,7 @@ bool createTransaction();
 std::string timePointToString(std::chrono::system_clock::time_point tp);
 
 std::chrono::system_clock::time_point stringToTimePoint(const std::string& str);
+
+bool storeTransactionInDb();
+
+bool bulkPostFromFile(const std::string& fileName, const std::string& url);

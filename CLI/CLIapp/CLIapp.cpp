@@ -50,7 +50,7 @@ void main() {
 			createEmployee();
 			break;
 		case 4:
-			cout << 4;
+			storeTransactionInDb();
 			break;
 		case 5:
 			cout << 5;
