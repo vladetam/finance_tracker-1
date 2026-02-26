@@ -73,12 +73,12 @@ bool Account::createAccount() {
     }
 
     json jEmployees = json::array();
-
+ 
     std::string response = httpGET("http://localhost:8080/api/employees");
-
+ 
     try {
         json j = json::parse(response);
-
+ 
         // Check if response itself is an array
         if (j.is_array()) {
             jEmployees = j;
@@ -92,48 +92,48 @@ bool Account::createAccount() {
         std::cout << "Invalid JSON: " << e.what() << "\n";
         return false;
     }
-
+ 
     // If no employees returned
     if (jEmployees.empty()) {
         std::cout << "No employees found. Please create employees first.\n";
         return false;
     }
-
+ 
     size_t choice;
     std::string input;
     Employee emp(0, "", "", "");
-
+ 
     while (true) {
         std::cout << "\nSelect an employee to assign:\n";
-
+ 
         for (size_t i = 0; i < jEmployees.size(); ++i) {
             const auto& e = jEmployees[i];
             std::cout << i + 1 << ". [" << e["id"] << "] "
-                << e["firstname"].get<std::string>() << " "
-                << e["lastname"].get<std::string>()
-                << " (" << e["email"].get<std::string>() << ")\n";
+    << e["firstname"].get<std::string>() << " "
+    << e["lastname"].get<std::string>()
+    << " (" << e["email"].get<std::string>() << ")\n";
         }
-
+ 
         std::cout << "Enter number: ";
         std::cin >> input;
         std::cin.ignore();
-
+ 
         try {
             choice = std::stoi(input);
-
+ 
             if (choice >= 1 && choice <= jEmployees.size()) {
                 auto selected = jEmployees[choice - 1];
-
+ 
                 emp = Employee(
                     selected["id"].get<long>(),
                     selected["firstname"].get<std::string>(),
                     selected["lastname"].get<std::string>(),
                     selected["email"].get<std::string>()
                 );
-
+ 
                 break;
             }
-
+ 
             std::cout << "Invalid employee selection. Try again.\n";
         }
         catch (std::invalid_argument&) {
@@ -143,7 +143,6 @@ bool Account::createAccount() {
             std::cout << "Number out of range\n";
         }
     }
-
     long newId = 1;
     int version = 1;
     json accounts = json::array();
