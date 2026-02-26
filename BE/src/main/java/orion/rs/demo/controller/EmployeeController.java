@@ -34,9 +34,9 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<EmployeeDto>> getAll(Pageable pageable) {
+    public ResponseEntity<List<EmployeeDto>> getAll(Pageable pageable) {
         Page<EmployeeDto> page = employeeService.getAll(pageable);
-        return ResponseEntity.ok(page);
+        return ResponseEntity.ok(page.getContent());
     }
 
     @GetMapping("/{id}")
@@ -84,20 +84,4 @@ public class EmployeeController {
                 .header(HttpHeaders.CONTENT_TYPE, "text/csv")
                 .body(csvData);
     }
-
-    /**
-     * Get invalid bulk insert Employees
-     * */
-
-    /*
-    @GetMapping(value = "/getInvalidBulkEmployees", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<FailedEmployee>> getInvalidEmployee(){
-
-
-    }
-
-    */
-
-
-
 }
