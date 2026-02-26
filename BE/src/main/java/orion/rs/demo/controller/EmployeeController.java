@@ -11,11 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import orion.rs.demo.annotations.CheckValidEmail;
 import orion.rs.demo.dto.BulkEmployeeDTO;
+import orion.rs.demo.dto.BulkResultDTO;
 import orion.rs.demo.dto.EmployeeDto;
 import orion.rs.demo.service.EmployeeService;
 import orion.rs.demo.service.implementation.EmployeeServiceImplementation;
 
-import javax.print.attribute.standard.Media;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -59,14 +59,15 @@ public class EmployeeController {
     }
 
 
-    @CheckValidEmail
+    //@CheckValidEmail
     @PostMapping(value = "bulkSaveAll",consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveOrSkipEmployee(@RequestBody List<BulkEmployeeDTO> bulkEmployeeDTOS){
 
-            employeeServiceImpl.saveOrSkipEmployee(bulkEmployeeDTOS);
+        BulkResultDTO result = employeeServiceImpl.saveOrSkipEmployeeService(bulkEmployeeDTOS);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Successfully added employees!" +
-                    "Employees that are invalid and failed to add are: " + employeeServiceImpl.getFailedEmployees());
+        return ResponseEntity.ok(result);
+
+
     }
 
 
