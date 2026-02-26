@@ -325,6 +325,11 @@ bool storeTransactionInDb() {
     
     bulkPostFromFile("transactions.json", "http://localhost:8080/api/transactions/bulk");
 
+    // Delete files after processing
+    std::filesystem::remove("employees.json");
+    std::filesystem::remove("accounts.json");
+    std::filesystem::remove("transactions.json");
+
     return true;
 }
 
