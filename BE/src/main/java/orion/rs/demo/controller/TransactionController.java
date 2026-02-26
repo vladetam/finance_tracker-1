@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import orion.rs.demo.domain.Status;
 import orion.rs.demo.domain.Transaction;
 import orion.rs.demo.dto.BulkInsertTransactionDTO;
@@ -36,6 +37,11 @@ public class TransactionController {
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
         this.transactionService = transactionService;
+    }
+
+    @GetMapping(value = "/getAllForCSV", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAllTransactionCSV(){
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getAllTransaction());
     }
 
     @PostMapping
