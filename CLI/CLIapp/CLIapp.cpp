@@ -4,6 +4,7 @@ using namespace std;
 #include "Account.h"
 #include "Employee.h"
 #include "Transaction.h"
+#include "logger.h"
 #include <nlohmann/json.hpp>
 
 bool running = true;
@@ -53,7 +54,7 @@ void main() {
 			storeTransactionInDb();
 			break;
 		case 5:
-			cout << 5;
+			monitorTransactions();
 			break;
 		case 6:
 			syncEmployees();
